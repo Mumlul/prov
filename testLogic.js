@@ -66,7 +66,7 @@ function showQuestion() {
         <div class="profession-card" data-type="${currentQuestion.A.type}">
             <h4>${currentQuestion.A.profession}</h4>
             <p class="short">${currentQuestion.A.short}</p>
-            <button class="select-btn">Выбрать</button>
+            
         </div>
         <div class="profession-card" data-type="${currentQuestion.B.type}">
             <h4>${currentQuestion.B.profession}</h4>
