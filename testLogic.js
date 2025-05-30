@@ -152,39 +152,100 @@ function prevQuestion() {
 
 // Завершение теста
 async function finishTest() {
-    clearInterval(timerInterval);
-    
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-    const personalityType = determinePersonality(scores);
-    const personalityInfo = getPersonalityDescription(personalityType);
+    clearInterval(timerInterval); // Останавливаем таймер
 
-    // Отображение результатов
-    resultPersonality.textContent = personalityType;
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000); // Время в секундах
+    const personalityType = determinePersonality(scores); // Определяем тип личности
+    const personalityInfo = getPersonalityDescription(personalityType); // Получаем описание
+
+    // Сортировка шкал по убыванию баллов
+    const sortedScores = Object.entries(scores)
+        .map(([type, score]) => ({
+            type: getDescriptionByType(type).name,
+            score
+        }))
+        .sort((a, b) => b.score - a.score);
+
+    // Определяем доминирующий и дополнительный типы
+    const dominantType = sortedScores[0].type;
+    const secondaryType = sortedScores[1]?.type || "Нет данных";
+
+    // Отображение основных результатов
+    resultPersonality.textContent = `${dominantType} ${secondaryType ? `+ ${secondaryType}` : ''}`;
     resultDescription.innerHTML = `
-        <p>${personalityInfo.description}</p>
-        <button id="read-more-btn">Подробнее о типе</button>
-        <div id="full-description" style="display:none;">
+        <p><strong>Описание:</strong> ${personalityInfo.description}</p>
+        
+        <details>
+            <summary>Подробнее о типе</summary>
             <p>${personalityInfo.fullDescription}</p>
             <h4>Рекомендуемые профессии:</h4>
             <ul>
                 ${personalityInfo.recommendedProfessions.map(prof => `<li>${prof}</li>`).join('')}
             </ul>
-        </div>
+        </details>
     `;
+
     timeSpentElement.textContent = timeSpent;
 
-    // Обработчик кнопки "Подробнее"
-    document.getElementById('read-more-btn')?.addEventListener('click', () => {
-        const fullDesc = document.getElementById('full-description');
-        fullDesc.style.display = fullDesc.style.display === 'none' ? 'block' : 'none';
-        document.getElementById('read-more-btn').textContent = 
-            fullDesc.style.display === 'none' ? 'Подробнее о типе' : 'Скрыть';
-    });
-
-    // Показ результатов
+    // Показываем блок с результатами
     showResults();
-    
-    // Отправка результатов
+
+    // === КНОПКА СКАЧИВАНИЯ PDF ===
+    const resultsContainer = document.querySelector('.results-container');
+
+    if (!document.getElementById('download-pdf-btn')) {
+        const downloadBtn = document.createElement('button');
+        downloadBtn.id = 'download-pdf-btn';
+        downloadBtn.textContent = 'Скачать сертификат (PDF)';
+        downloadBtn.style.marginTop = '20px';
+        downloadBtn.style.padding = '10px 20px';
+        downloadBtn.style.fontSize = '16px';
+        downloadBtn.style.backgroundColor = '#007BFF';
+        downloadBtn.style.color = 'white';
+        downloadBtn.style.border = 'none';
+        downloadBtn.style.borderRadius = '5px';
+        downloadBtn.style.cursor = 'pointer';
+
+        downloadBtn.addEventListener('click', async () => {
+            const payload = {
+                name: userName || "Тестируемый",
+                group: userGroup || "Не указано",
+                dominantType,
+                secondaryType,
+                dominantDesc: getDescriptionByType(sortedScores[0].type.charAt(0)).fullDescription,
+                secondaryDesc: getDescriptionByType(sortedScores[1]?.type?.charAt(0) || 'I').fullDescription,
+                scores: sortedScores,
+                professions: personalityInfo.recommendedProfessions,
+                date: new Date().toLocaleDateString()
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/generate-certificate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Ошибка при генерации PDF");
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `certificate_${userName || 'user'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (error) {
+                console.error("Ошибка при создании PDF:", error);
+                alert("Не удалось создать PDF. Попробуйте позже.");
+            }
+        });
+
+        resultsContainer.appendChild(downloadBtn);
+    }
+
+    // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР ===
     try {
         await saveResults({
             name: userName,
@@ -272,3 +333,33 @@ function getPersonalityDescription(type) {
 // Инициализация обработчиков
 nextButton.addEventListener('click', nextQuestion);
 prevButton.addEventListener('click', prevQuestion);
+
+function getDescriptionByType(type) {
+    const descriptions = {
+        I: {
+            name: "Реалистический тип",
+            description: "Вы ориентированы на работу с вещами, техникой и конкретными объектами."
+        },
+        II: {
+            name: "Исследовательский тип",
+            description: "Вы любите исследовать идеи и решать сложные задачи."
+        },
+        III: {
+            name: "Социальный тип",
+            description: "Вы чувствительны к людям и предпочитаете общение и помощь другим."
+        },
+        IV: {
+            name: "Конвенциональный тип",
+            description: "Вы предпочитаете структурированную, упорядоченную работу."
+        },
+        V: {
+            name: "Предприимчивый тип",
+            description: "Вы энергичны, предприимчивы и любите влиять на других."
+        },
+        VI: {
+            name: "Артистический тип",
+            description: "Вы креативны, чувствительны и любите творчество."
+        }
+    };
+    return descriptions[type] || { name: "Неизвестный тип", description: "" };
+}
