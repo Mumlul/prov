@@ -62,20 +62,29 @@ function showQuestion() {
     resetState();
     const currentQuestion = questions[currentQuestionIndex];
 
+    updateProgress();
+
     questionElement.innerHTML = `
         <div class="profession-card" data-type="${currentQuestion.A.type}">
             <h4>${currentQuestion.A.profession}</h4>
             <p class="short">${currentQuestion.A.short}</p>
-            
         </div>
         <div class="profession-card" data-type="${currentQuestion.B.type}">
             <h4>${currentQuestion.B.profession}</h4>
             <p class="short">${currentQuestion.B.short}</p>
-            <button class="select-btn">Выбрать</button>
         </div>
     `;
 
     setupQuestionButtons();
+    updateNavButtons();
+}
+
+function updateProgress() {
+    if (questions.length > 0) {
+        const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+        progressFill.style.width = `${progress}%`;
+        progressText.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+    }
 }
 
 // Настройка обработчиков кнопок вопроса
