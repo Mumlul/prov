@@ -231,20 +231,27 @@ main {
 
 .question-content {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
+
 
 .profession-card {
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     padding: 20px;
+    width: 45%;
+    min-width: 300px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .profession-card:hover {
     border-color: #237DF5;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(35, 125, 245, 0.2);
 }
 
 .profession-card.selected {
@@ -260,6 +267,12 @@ main {
 .profession-card .short {
     color: #666;
     margin-bottom: 10px;
+}
+
+.profession-card .select-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
 }
 
 .profession-card .full {

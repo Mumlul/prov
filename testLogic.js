@@ -62,39 +62,28 @@ function showQuestion() {
     resetState();
     const currentQuestion = questions[currentQuestionIndex];
 
-    // Обновление прогресса
-    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-    progressFill.style.width = `${progress}%`;
-    progressText.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
-
     questionElement.innerHTML = `
-        <div class="professions">
-            <div class="profession-card">
-                <h4>${currentQuestion.A.profession}</h4>
-                <p class="short">${currentQuestion.A.short}</p>
-                <p class="full" style="display:none;">${currentQuestion.A.full}</p>
-                <button class="more-btn">Подробнее</button>
-                <button class="select-btn" data-type="${currentQuestion.A.type}">Выбрать</button>
-            </div>
-            <div class="profession-card">
-                <h4>${currentQuestion.B.profession}</h4>
-                <p class="short">${currentQuestion.B.short}</p>
-                <p class="full" style="display:none;">${currentQuestion.B.full}</p>
-                <button class="more-btn">Подробнее</button>
-                <button class="select-btn" data-type="${currentQuestion.B.type}">Выбрать</button>
-            </div>
+        <div class="profession-card" data-type="${currentQuestion.A.type}">
+            <h4>${currentQuestion.A.profession}</h4>
+            <p class="short">${currentQuestion.A.short}</p>
+            <button class="select-btn">Выбрать</button>
+        </div>
+        <div class="profession-card" data-type="${currentQuestion.B.type}">
+            <h4>${currentQuestion.B.profession}</h4>
+            <p class="short">${currentQuestion.B.short}</p>
+            <button class="select-btn">Выбрать</button>
         </div>
     `;
 
     setupQuestionButtons();
-    updateNavButtons();
 }
 
 // Настройка обработчиков кнопок вопроса
 function setupQuestionButtons() {
-    // Кнопки "Подробнее"
+    // Обработчик для кнопки "Подробнее"
     document.querySelectorAll('.more-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const card = btn.closest('.profession-card');
             const fullText = card.querySelector('.full');
             fullText.style.display = fullText.style.display === 'none' ? 'block' : 'none';
@@ -102,13 +91,28 @@ function setupQuestionButtons() {
         });
     });
 
-    // Кнопки "Выбрать"
-    document.querySelectorAll('.select-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const type = btn.dataset.type;
+    // Обработчик клика по всей карточке
+    document.querySelectorAll('.profession-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.dataset.type;
             scores[type] = (scores[type] || 0) + 1;
+            
+            // Снимаем выделение со всех карточек
+            document.querySelectorAll('.profession-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Выделяем текущую карточку
+            card.classList.add('selected');
             nextButton.disabled = false;
-            btn.closest('.profession-card').classList.add('selected');
+        });
+    });
+
+    // Обработчик для кнопки "Выбрать" (дублирует функционал клика по карточке)
+    document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            btn.closest('.profession-card').click();
         });
     });
 }
