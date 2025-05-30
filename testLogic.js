@@ -1,0 +1,261 @@
+// testLogic.js - Логика тестирования
+
+import { showResults, userName, userGroup } from './navigation.js';
+
+// Константы API
+const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api";
+const QUESTIONS_ENDPOINT = "/questions";
+const RESULTS_ENDPOINT = "/save";
+
+// Элементы DOM
+const questionElement = document.getElementById('questionContent');
+const nextButton = document.getElementById('next-btn');
+const prevButton = document.getElementById('prev-btn');
+const resultPersonality = document.getElementById('result-personality');
+const resultDescription = document.getElementById('result-description');
+const timeSpentElement = document.getElementById('time-spent');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+// Переменные состояния
+let questions = [];
+let currentQuestionIndex = 0;
+let scores = {};
+let startTime;
+let timerInterval;
+
+// Инициализация теста
+window.initTest = function() {
+    currentQuestionIndex = 0;
+    scores = { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 };
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+    
+    loadQuestions();
+};
+
+// Сброс теста
+window.resetTest = function() {
+    clearInterval(timerInterval);
+    currentQuestionIndex = 0;
+    scores = { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 };
+};
+
+// Загрузка вопросов
+async function loadQuestions() {
+    try {
+        questions = await fetchQuestions();
+        showQuestion();
+    } catch (error) {
+        console.error("Ошибка при загрузке вопросов:", error);
+        quizContainer.innerHTML = `
+            <div class="error">
+                <p>Не удалось загрузить вопросы. Пожалуйста, попробуйте позже.</p>
+                <button onclick="location.reload()">Обновить страницу</button>
+            </div>
+        `;
+    }
+}
+
+// Отображение текущего вопроса
+function showQuestion() {
+    resetState();
+    const currentQuestion = questions[currentQuestionIndex];
+
+    // Обновление прогресса
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+    progressFill.style.width = `${progress}%`;
+    progressText.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+
+    questionElement.innerHTML = `
+        <div class="professions">
+            <div class="profession-card">
+                <h4>${currentQuestion.A.profession}</h4>
+                <p class="short">${currentQuestion.A.short}</p>
+                <p class="full" style="display:none;">${currentQuestion.A.full}</p>
+                <button class="more-btn">Подробнее</button>
+                <button class="select-btn" data-type="${currentQuestion.A.type}">Выбрать</button>
+            </div>
+            <div class="profession-card">
+                <h4>${currentQuestion.B.profession}</h4>
+                <p class="short">${currentQuestion.B.short}</p>
+                <p class="full" style="display:none;">${currentQuestion.B.full}</p>
+                <button class="more-btn">Подробнее</button>
+                <button class="select-btn" data-type="${currentQuestion.B.type}">Выбрать</button>
+            </div>
+        </div>
+    `;
+
+    setupQuestionButtons();
+    updateNavButtons();
+}
+
+// Настройка обработчиков кнопок вопроса
+function setupQuestionButtons() {
+    // Кнопки "Подробнее"
+    document.querySelectorAll('.more-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const card = btn.closest('.profession-card');
+            const fullText = card.querySelector('.full');
+            fullText.style.display = fullText.style.display === 'none' ? 'block' : 'none';
+            btn.textContent = fullText.style.display === 'none' ? 'Подробнее' : 'Скрыть';
+        });
+    });
+
+    // Кнопки "Выбрать"
+    document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            scores[type] = (scores[type] || 0) + 1;
+            nextButton.disabled = false;
+            btn.closest('.profession-card').classList.add('selected');
+        });
+    });
+}
+
+// Обновление состояния кнопок навигации
+function updateNavButtons() {
+    prevButton.disabled = currentQuestionIndex === 0;
+    nextButton.disabled = true;
+}
+
+// Переход к следующему вопросу
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion();
+    } else {
+        finishTest();
+    }
+}
+
+// Переход к предыдущему вопросу
+function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showQuestion();
+    }
+}
+
+// Завершение теста
+async function finishTest() {
+    clearInterval(timerInterval);
+    
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    const personalityType = determinePersonality(scores);
+    const personalityInfo = getPersonalityDescription(personalityType);
+
+    // Отображение результатов
+    resultPersonality.textContent = personalityType;
+    resultDescription.innerHTML = `
+        <p>${personalityInfo.description}</p>
+        <button id="read-more-btn">Подробнее о типе</button>
+        <div id="full-description" style="display:none;">
+            <p>${personalityInfo.fullDescription}</p>
+            <h4>Рекомендуемые профессии:</h4>
+            <ul>
+                ${personalityInfo.recommendedProfessions.map(prof => `<li>${prof}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+    timeSpentElement.textContent = timeSpent;
+
+    // Обработчик кнопки "Подробнее"
+    document.getElementById('read-more-btn')?.addEventListener('click', () => {
+        const fullDesc = document.getElementById('full-description');
+        fullDesc.style.display = fullDesc.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('read-more-btn').textContent = 
+            fullDesc.style.display === 'none' ? 'Подробнее о типе' : 'Скрыть';
+    });
+
+    // Показ результатов
+    showResults();
+    
+    // Отправка результатов
+    try {
+        await saveResults({
+            name: userName,
+            personality: personalityType,
+            time: timeSpent,
+            group: userGroup,
+            scores: scores
+        });
+    } catch (error) {
+        console.error("Ошибка при сохранении результатов:", error);
+    }
+}
+
+// Вспомогательные функции
+function resetState() {
+    questionElement.innerHTML = '';
+    nextButton.disabled = true;
+}
+
+function updateTimer() {
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    timeSpentElement.textContent = timeSpent;
+}
+
+async function fetchQuestions() {
+    const response = await fetch(`${API_BASE_URL}${QUESTIONS_ENDPOINT}`);
+    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+    return await response.json();
+}
+
+async function saveResults(data) {
+    const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+    return await response.json();
+}
+
+function determinePersonality(scores) {
+    return Object.entries(scores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+}
+
+function getPersonalityDescription(type) {
+    const descriptions = {
+        I: {
+            description: "Реалистический тип: Вы ориентированы на работу с вещами, техникой и конкретными объектами.",
+            fullDescription: "Реалистический тип предпочитает работать с вещами, а не с людьми. Это несоциальный, эмоционально-стабильный тип. Люди этого типа хорошо приспосабливаются к обстановке, трудолюбивы, настойчивы и уверены в себе.",
+            recommendedProfessions: ["Инженер", "Механик", "Строитель", "Водитель", "Фермер"]
+        },
+        II: {
+            description: "Исследовательский тип: Вы любите исследовать идеи и решать сложные задачи.",
+            fullDescription: "Исследовательский тип ориентирован на работу с идеями и вещами. Характеризуется любознательностью, методичностью и аналитическим мышлением.",
+            recommendedProfessions: ["Ученый", "Программист", "Математик", "Биолог", "Физик"]
+        },
+        III: {
+            description: "Социальный тип: Вы чувствительны к людям и предпочитаете общение и помощь другим.",
+            fullDescription: "Социальный тип ориентирован на общение и взаимодействие с другими людьми. Люди этого типа гуманны, эмпатичны, активны и готовы прийти на помощь.",
+            recommendedProfessions: ["Учитель", "Врач", "Психолог", "Социальный работник", "Тренер"]
+        },
+        IV: {
+            description: "Конвенциональный тип: Вы предпочитаете структурированную, упорядоченную работу.",
+            fullDescription: "Конвенциональный тип выбирает четко структурированную деятельность, связанную с обработкой информации. Люди этого типа аккуратны, пунктуальны, дисциплинированы и добросовестны.",
+            recommendedProfessions: ["Бухгалтер", "Банковский служащий", "Секретарь", "Архивариус", "Аналитик данных"]
+        },
+        V: {
+            description: "Предприимчивый тип: Вы энергичны, предприимчивы и любите влиять на других.",
+            fullDescription: "Предприимчивый тип выбирает цели, которые позволяют проявить энергию и энтузиазм. Люди этого типа находчивы, практичны, быстро ориентируются в сложной обстановке.",
+            recommendedProfessions: ["Менеджер", "Предприниматель", "Юрист", "Политик", "Риелтор"]
+        },
+        VI: {
+            description: "Артистический тип: Вы креативны, чувствительны и любите творчество.",
+            fullDescription: "Артистический тип характеризуется богатым воображением, чувствительностью и оригинальностью. Люди этого типа независимы, эмоциональны и предпочитают творческую деятельность.",
+            recommendedProfessions: ["Художник", "Музыкант", "Писатель", "Актер", "Дизайнер"]
+        }
+    };
+    return descriptions[type] || {
+        description: "Не удалось определить ваш тип личности.",
+        fullDescription: "Попробуйте пройти тест еще раз.",
+        recommendedProfessions: []
+    };
+}
+
+// Инициализация обработчиков
+nextButton.addEventListener('click', nextQuestion);
+prevButton.addEventListener('click', prevQuestion);

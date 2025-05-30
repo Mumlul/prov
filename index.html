@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Голланда - УМЦПК</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-main">УМЦПК</div>
+                <div class="logo-sub">учебный межрегиональный центр подготовки кадров</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="main-content" id="mainContent">
+            <div class="features">
+                <div class="feature">
+                    <h2>Точная диагностика</h2>
+                    <p>Научно обоснованная методика определения профессиональных представлений.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>Быстрое преломление</h3>
+                    <p>Всего 9-20 минут для получения подробного анализа выявит предпочтение!</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>Профессиональные рекомендации</h3>
+                    <p>Получатся список профессий, наиболее подходящих заданную тему личности.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>Экспертная поддержка</h3>
+                    <p>Разработана специалистами УМИЛК с выполнением описания и проборяжениями.</p>
+                </div>
+            </div>
+
+            <div class="cta-block">
+                <h2>Готовы узнать свою идеальную профессию?</h2>
+                <p>Тест состоит из 42 вопросов. Отвечайте честно и не задумывайтесь долго над ответами.</p>
+                <button class="start-test-btn" id="startTestBtn">Начать тестирование</button>
+            </div>
+        </section>
+
+        <section class="user-info-form" id="userInfoForm" style="display: none;">
+            <button class="back-btn" id="backBtn">← Назад</button>
+            
+            <div class="form-container">
+                <h2>Информация о тестируемом</h2>
+                <p class="form-description">Пожалуйста, заполните данные для создания сертификата</p>
+                
+                <form id="testForm">
+                    <div class="form-group">
+                        <label for="fullName">Фамилия, Имя, Отчество *</label>
+                        <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="school">Номер школы *</label>
+                        <input type="text" id="school" name="school" required placeholder="№ 123" list="schoolsList">
+                        <datalist id="schoolsList">
+                            <option value="МАОУ СОШ № 16">
+                            <option value="МАОУ СОШ № 19">
+                            <option value="МАОУ СОШ № 23">
+                        </datalist>
+                    </div>
+                    
+                    <button type="button" class="submit-btn" id="submitFormBtn">Продолжить к тестированию</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="quiz-container" id="quizContainer" style="display: none;">
+            <div class="quiz-header">
+                <button class="back-btn" id="backToFormBtn">Назад</button>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">1/42</div>
+                </div>
+            </div>
+            
+            <div class="question-container">
+                <h3>Выберите профессию, которая вам больше нравится:</h3>
+                <div id="questionContent" class="question-content"></div>
+            </div>
+            
+            <div class="quiz-navigation">
+                <button id="prev-btn" class="nav-btn" disabled>← Назад</button>
+                <button id="next-btn" class="nav-btn" disabled>Далее →</button>
+            </div>
+        </section>
+
+        <section class="result-container" id="resultContainer" style="display: none;">
+            <div class="result-content">
+                <h2>Результаты тестирования</h2>
+                <p>Ваш тип личности: <span id="result-personality"></span></p>
+                <div id="result-description"></div>
+                <p>Время прохождения: <span id="time-spent"></span> сек.</p>
+                <button id="restart-btn" class="submit-btn">Пройти тест заново</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="navigation.js"></script>
+    <script type="module" src="testLogic.js"></script>
+</body>
+</html>

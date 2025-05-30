@@ -1,0 +1,408 @@
+/* Основные стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: #F8F8F8;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Шапка */
+header {
+    background-color: #237DF5;
+    color: white;
+    padding: 15px 0;
+}
+
+.header-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    text-align: center;
+}
+
+.logo-main {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.logo-sub {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Основной контент */
+main {
+    padding: 30px 0;
+}
+
+.main-content {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.features {
+    margin-bottom: 40px;
+}
+
+.feature {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(35, 125, 245, 0.1);
+}
+
+.feature h2, .feature h3 {
+    color: #2337A5;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.cta-block {
+    background: linear-gradient(135deg, #237DF5 0%, #2337A5 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.cta-block h2 {
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+.start-test-btn {
+    background-color: white;
+    color: #237DF5;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.start-test-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Форма */
+.user-info-form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(35, 125, 245, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-container h2 {
+    color: #2337A5;
+    margin-bottom: 10px;
+}
+
+.form-description {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #237DF5;
+    outline: none;
+}
+
+.submit-btn {
+    background-color: #237DF5;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #1a6bd8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Тест */
+.quiz-container, .result-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(35, 125, 245, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #237DF5;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #1a6bd8;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 70%;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: #237DF5;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: #555;
+}
+
+.question-container h3 {
+    color: #2337A5;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.question-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profession-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profession-card:hover {
+    border-color: #237DF5;
+}
+
+.profession-card.selected {
+    border-color: #237DF5;
+    background-color: #f5f9ff;
+}
+
+.profession-card h4 {
+    color: #2337A5;
+    margin-bottom: 10px;
+}
+
+.profession-card .short {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.profession-card .full {
+    color: #444;
+    margin-top: 10px;
+    display: none;
+}
+
+.more-btn, .select-btn {
+    background: none;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.more-btn {
+    color: #237DF5;
+    border: 1px solid #237DF5;
+}
+
+.more-btn:hover {
+    background-color: #f0f7ff;
+}
+
+.select-btn {
+    background-color: #237DF5;
+    color: white;
+}
+
+.select-btn:hover {
+    background-color: #1a6bd8;
+}
+
+.quiz-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.nav-btn {
+    background-color: #237DF5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background-color: #1a6bd8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Результаты */
+.result-content h2 {
+    color: #2337A5;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.result-content p {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+#result-personality {
+    font-weight: 700;
+    color: #237DF5;
+}
+
+#time-spent {
+    font-weight: 700;
+}
+
+#read-more-btn {
+    background-color: #237DF5;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+}
+
+#read-more-btn:hover {
+    background-color: #1a6bd8;
+}
+
+#full-description {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#full-description h4 {
+    margin: 15px 0 10px;
+    color: #2337A5;
+}
+
+#full-description ul {
+    padding-left: 20px;
+}
+
+#full-description li {
+    margin-bottom: 5px;
+}
+
+/* Адаптация */
+@media (max-width: 768px) {
+    .quiz-container, .user-info-form, .result-container {
+        padding: 20px;
+    }
+    
+    .progress-container {
+        width: 60%;
+    }
+    
+    .professions {
+        flex-direction: column;
+    }
+    
+    .profession-card {
+        width: 100%;
+    }
+}
