@@ -191,58 +191,76 @@ async function finishTest() {
     showResults();
 
     // === КНОПКА СКАЧИВАНИЯ PDF ===
-    const resultsContainer = document.querySelector('.results-container');
+    
+    const downloadSection = document.getElementById('pdf-download-section');
 
-    if (!document.getElementById('download-pdf-btn')) {
-        const downloadBtn = document.createElement('button');
-        downloadBtn.id = 'download-pdf-btn';
-        downloadBtn.textContent = 'Скачать сертификат (PDF)';
-        downloadBtn.style.marginTop = '20px';
-        downloadBtn.style.padding = '10px 20px';
-        downloadBtn.style.fontSize = '16px';
-        downloadBtn.style.backgroundColor = '#007BFF';
-        downloadBtn.style.color = 'white';
-        downloadBtn.style.border = 'none';
-        downloadBtn.style.borderRadius = '5px';
-        downloadBtn.style.cursor = 'pointer';
+if (downloadSection) {
+    downloadSection.innerHTML = `
+        <button id="download-pdf-btn" style="
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        ">
+            Скачать сертификат (PDF)
+        </button>
+    `;
 
-        downloadBtn.addEventListener('click', async () => {
-            const payload = {
-                name: userName || "Тестируемый",
-                group: userGroup || "Не указано",
-                dominantType,
-                secondaryType,
-                dominantDesc: getDescriptionByType(sortedScores[0].type.charAt(0)).fullDescription,
-                secondaryDesc: getDescriptionByType(sortedScores[1]?.type?.charAt(0) || 'I').fullDescription,
-                scores: sortedScores,
-                professions: personalityInfo.recommendedProfessions,
-                date: new Date().toLocaleDateString()
-            };
+    document.getElementById('download-pdf-btn').addEventListener('click', async () => {
+        const personalityType = determinePersonality(scores);
+        const personalityInfo = getPersonalityDescription(personalityType);
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/generate-certificate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+        // Сортировка шкал по баллам
+        const sortedScores = Object.entries(scores)
+            .map(([type, score]) => ({
+                type: getDescriptionByType(type).name,
+                score
+            }))
+            .sort((a, b) => b.score - a.score);
 
-                if (!response.ok) throw new Error("Ошибка при генерации PDF");
+        const dominantType = sortedScores[0].type;
+        const secondaryType = sortedScores[1]?.type || "Нет данных";
 
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `certificate_${userName || 'user'}_${new Date().toISOString().slice(0, 10)}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } catch (error) {
-                console.error("Ошибка при создании PDF:", error);
-                alert("Не удалось создать PDF. Попробуйте позже.");
-            }
-        });
+        const payload = {
+            name: userName,
+            group: userGroup,
+            dominantType,
+            secondaryType,
+            dominantDesc: getDescriptionByType(sortedScores[0].type.charAt(0)).fullDescription,
+            secondaryDesc: getDescriptionByType(sortedScores[1]?.type?.charAt(0) || 'I').fullDescription,
+            scores: sortedScores,
+            professions: personalityInfo.recommendedProfessions,
+            date: new Date().toLocaleDateString()
+        };
 
-        resultsContainer.appendChild(downloadBtn);
+        try {
+            const response = await fetch(`${API_BASE_URL}/generate-certificate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("Ошибка при генерации PDF");
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `certificate_${userName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error("Не удалось скачать PDF:", error);
+            alert("Произошла ошибка при создании PDF");
+        }
+    });
+    } else {
+    console.warn("Контейнер для кнопки PDF не найден");
     }
 
     // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР ===
