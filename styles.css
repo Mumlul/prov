@@ -419,3 +419,12 @@ main {
         width: 100%;
     }
 }
+
+#download-certificate-btn {
+    background-color: #4CAF50;
+    margin-top: 15px;
+}
+
+#download-certificate-btn:hover {
+    background-color: #45a049;
+}
