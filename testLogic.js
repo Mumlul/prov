@@ -1,6 +1,7 @@
 // testLogic.js - Логика тестирования
 
 import { showResults, userName, userGroup } from './navigation.js';
+import { generateCertificate } from './certificateGenerator.js';
 
 // Константы API
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api";
@@ -183,71 +184,50 @@ async function finishTest() {
     showResults();
     // === КНОПКА СКАЧИВАНИЯ PDF ===
     const downloadSection = document.getElementById('pdf-download-section');
-    if (downloadSection) {
-        downloadSection.innerHTML = `
-            <button id="download-certificate-btn" style="
-                margin-top: 20px;
-                padding: 10px 20px;
-                font-size: 16px;
-                background-color: #007BFF;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            ">
-                Скачать сертификат (PDF)
-            </button>
-        `;
-        document.getElementById('download-certificate-btn').addEventListener('click', async () => {
-            try {
-                const secondaryTypeCode = getSecondaryType(scores);
-                const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
-                const response = await fetch(`${API_BASE_URL}/generate-certificate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: userName,
-                        group: userGroup,
-                        dominantType: dominantType,
-                        dominantDesc: personalityInfo.fullDescription,
-                        secondaryType: secondaryType,
-                        secondaryDesc: secondaryTypeInfo.fullDescription,
-                        scores: sortedScores,
-                        professions: personalityInfo.recommendedProfessions,
-                        date: new Date().toLocaleDateString()
-                    })
-                });
-                if (!response.ok) throw new Error('Ошибка генерации PDF');
+if (downloadSection) {
+    downloadSection.innerHTML = `
+        <button id="download-certificate-btn" style="
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        ">
+            Скачать сертификат (PDF)
+        </button>
+    `;
 
-                // Получаем JSON с URL
-                const data = await response.json();
+    document.getElementById('download-certificate-btn').addEventListener('click', () => {
+        try {
+            const secondaryTypeCode = getSecondaryType(scores);
+            const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
 
-                // Проверяем наличие URL
-                if (!data.url) throw new Error('Ссылка на PDF не найдена');
+            const dominantType = sortedScores[0].type;
+            const secondaryType = sortedScores[1]?.type || "Нет данных";
 
-                // Открываем PDF в новом окне или скачиваем его
-                window.open(data.url, '_blank'); // можно использовать `_self` для открытия в том же окне
+            const certificateData = {
+                dominantType: dominantType,
+                dominantDesc: personalityInfo.fullDescription,
+                secondaryType: secondaryType,
+                secondaryDesc: secondaryTypeInfo.fullDescription,
+                scores: sortedScores,
+                professions: personalityInfo.recommendedProfessions,
+                date: new Date().toLocaleDateString()
+            };
 
-                /* 
-                 * Альтернатива: Принудительно скачать файл:
-                const link = document.createElement('a');
-                link.href = data.url;
-                link.download = `Сертификат_Голланда_${userName}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                */
-
-            } catch (error) {
-                console.error('Ошибка при скачивании:', error);
-                alert('Не удалось сгенерировать сертификат');
-            }
-        });
-    } else {
-        console.warn("Контейнер для кнопки PDF не найден");
-    }
+            // Вызов функции генерации сертификата
+            generateCertificate(certificateData);
+        } catch (error) {
+            console.error('Ошибка при генерации сертификата:', error);
+            alert('Не удалось сгенерировать сертификат');
+        }
+    });
+} else {
+    console.warn("Контейнер для кнопки сертификата не найден");
+}
 
     // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР ===
     try {
