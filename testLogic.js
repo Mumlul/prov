@@ -1,10 +1,9 @@
 // testLogic.js - Логика тестирования
-
 import { showResults, userName, userGroup } from './navigation.js';
-import { generateCertificate } from './certificateGenerator.js';
+import { generateCertificate } from './certificateGenerator.js'; // Импортируем функцию генерации сертификата
 
-// Константы API
-const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api";
+// Константы API (если нужно будет вернуться обратно)
+const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
 const QUESTIONS_ENDPOINT = "/questions";
 const RESULTS_ENDPOINT = "/save";
 
@@ -26,17 +25,16 @@ let startTime;
 let timerInterval;
 
 // Инициализация теста
-window.initTest = function() {
+window.initTest = function () {
     currentQuestionIndex = 0;
     scores = { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 };
     startTime = Date.now();
     timerInterval = setInterval(updateTimer, 1000);
-    
     loadQuestions();
 };
 
 // Сброс теста
-window.resetTest = function() {
+window.resetTest = function () {
     clearInterval(timerInterval);
     currentQuestionIndex = 0;
     scores = { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 };
@@ -62,9 +60,7 @@ async function loadQuestions() {
 function showQuestion() {
     resetState();
     const currentQuestion = questions[currentQuestionIndex];
-
     updateProgress();
-
     questionElement.innerHTML = `
         <div class="profession-card" data-type="${currentQuestion.A.type}">
             <h4>${currentQuestion.A.profession}</h4>
@@ -75,7 +71,6 @@ function showQuestion() {
             <p class="short">${currentQuestion.B.short}</p>
         </div>
     `;
-
     setupQuestionButtons();
     updateNavButtons();
 }
@@ -106,19 +101,19 @@ function setupQuestionButtons() {
         card.addEventListener('click', () => {
             const type = card.dataset.type;
             scores[type] = (scores[type] || 0) + 1;
-            
+
             // Снимаем выделение со всех карточек
             document.querySelectorAll('.profession-card').forEach(c => {
                 c.classList.remove('selected');
             });
-            
+
             // Выделяем текущую карточку
             card.classList.add('selected');
             nextButton.disabled = false;
         });
     });
 
-    // Обработчик для кнопки "Выбрать" (дублирует функционал клика по карточке)
+    // Обработчик для кнопки "Выбрать"
     document.querySelectorAll('.select-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -156,6 +151,7 @@ async function finishTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000); // Время в секундах
     const personalityType = determinePersonality(scores); // Определяем тип личности
     const personalityInfo = getPersonalityDescription(personalityType); // Получаем описание
+
     // Сортировка шкал по убыванию баллов
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
@@ -163,9 +159,11 @@ async function finishTest() {
             score
         }))
         .sort((a, b) => b.score - a.score);
+
     // Определяем доминирующий и дополнительный типы
     const dominantType = sortedScores[0].type;
     const secondaryType = sortedScores[1]?.type || "Нет данных";
+
     // Отображение основных результатов
     resultPersonality.textContent = `${dominantType} ${secondaryType ? `+ ${secondaryType}` : ''}`;
     resultDescription.innerHTML = `
@@ -180,56 +178,57 @@ async function finishTest() {
         </details>
     `;
     timeSpentElement.textContent = timeSpent;
+
     // Показываем блок с результатами
     showResults();
-    // === КНОПКА СКАЧИВАНИЯ PDF ===
+
+    // === КНОПКА СКАЧИВАНИЯ СЕРТИФИКАТА ===
     const downloadSection = document.getElementById('pdf-download-section');
-if (downloadSection) {
-    downloadSection.innerHTML = `
-        <button id="download-certificate-btn" style="
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        ">
-            Скачать сертификат (PDF)
-        </button>
-    `;
+    if (downloadSection) {
+        downloadSection.innerHTML = `
+            <button id="download-certificate-btn" style="
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            ">
+                Скачать сертификат (PDF)
+            </button>
+        `;
 
-    document.getElementById('download-certificate-btn').addEventListener('click', () => {
-        try {
-            const secondaryTypeCode = getSecondaryType(scores);
-            const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
+        document.getElementById('download-certificate-btn').addEventListener('click', () => {
+            try {
+                const secondaryTypeCode = getSecondaryType(scores);
+                const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
 
-            const dominantType = sortedScores[0].type;
-            const secondaryType = sortedScores[1]?.type || "Нет данных";
+                const certificateData = {
+                    name: userName,
+                    group: userGroup,
+                    dominantType: dominantType,
+                    dominantDesc: personalityInfo.fullDescription,
+                    secondaryType: secondaryType,
+                    secondaryDesc: secondaryTypeInfo?.fullDescription || "Нет данных",
+                    scores: sortedScores,
+                    professions: personalityInfo.recommendedProfessions,
+                    date: new Date().toLocaleDateString()
+                };
 
-            const certificateData = {
-                dominantType: dominantType,
-                dominantDesc: personalityInfo.fullDescription,
-                secondaryType: secondaryType,
-                secondaryDesc: secondaryTypeInfo.fullDescription,
-                scores: sortedScores,
-                professions: personalityInfo.recommendedProfessions,
-                date: new Date().toLocaleDateString()
-            };
+                // Вызываем функцию генерации сертификата
+                generateCertificate(certificateData);
+            } catch (error) {
+                console.error('Ошибка при создании сертификата:', error);
+                alert('Не удалось сгенерировать сертификат');
+            }
+        });
+    } else {
+        console.warn("Контейнер для кнопки сертификата не найден");
+    }
 
-            // Вызов функции генерации сертификата
-            generateCertificate(certificateData);
-        } catch (error) {
-            console.error('Ошибка при генерации сертификата:', error);
-            alert('Не удалось сгенерировать сертификат');
-        }
-    });
-} else {
-    console.warn("Контейнер для кнопки сертификата не найден");
-}
-
-    // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР ===
+    // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР (по желанию) ===
     try {
         await saveResults({
             name: userName,
@@ -277,7 +276,7 @@ async function saveResults(data) {
 }
 
 function determinePersonality(scores) {
-    return Object.entries(scores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+    return Object.entries(scores).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
 }
 
 function getPersonalityDescription(type) {
@@ -320,10 +319,6 @@ function getPersonalityDescription(type) {
     };
 }
 
-// Инициализация обработчиков
-nextButton.addEventListener('click', nextQuestion);
-prevButton.addEventListener('click', prevQuestion);
-
 function getDescriptionByType(type) {
     const descriptions = {
         I: {
@@ -353,3 +348,7 @@ function getDescriptionByType(type) {
     };
     return descriptions[type] || { name: "Неизвестный тип", description: "" };
 }
+
+// Инициализация обработчиков
+nextButton.addEventListener('click', nextQuestion);
+prevButton.addEventListener('click', prevQuestion);
