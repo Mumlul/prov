@@ -152,11 +152,9 @@ function prevQuestion() {
 
 async function finishTest() {
     clearInterval(timerInterval); // Останавливаем таймер
-
     const timeSpent = Math.floor((Date.now() - startTime) / 1000); // Время в секундах
     const personalityType = determinePersonality(scores); // Определяем тип личности
     const personalityInfo = getPersonalityDescription(personalityType); // Получаем описание
-
     // Сортировка шкал по убыванию баллов
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
@@ -164,16 +162,13 @@ async function finishTest() {
             score
         }))
         .sort((a, b) => b.score - a.score);
-
     // Определяем доминирующий и дополнительный типы
     const dominantType = sortedScores[0].type;
     const secondaryType = sortedScores[1]?.type || "Нет данных";
-
     // Отображение основных результатов
     resultPersonality.textContent = `${dominantType} ${secondaryType ? `+ ${secondaryType}` : ''}`;
     resultDescription.innerHTML = `
         <p><strong>Описание:</strong> ${personalityInfo.description}</p>
-        
         <details>
             <summary>Подробнее о типе</summary>
             <p>${personalityInfo.fullDescription}</p>
@@ -183,15 +178,11 @@ async function finishTest() {
             </ul>
         </details>
     `;
-
     timeSpentElement.textContent = timeSpent;
-
     // Показываем блок с результатами
     showResults();
-
     // === КНОПКА СКАЧИВАНИЯ PDF ===
     const downloadSection = document.getElementById('pdf-download-section');
-    
     if (downloadSection) {
         downloadSection.innerHTML = `
             <button id="download-certificate-btn" style="
@@ -207,12 +198,10 @@ async function finishTest() {
                 Скачать сертификат (PDF)
             </button>
         `;
-
         document.getElementById('download-certificate-btn').addEventListener('click', async () => {
             try {
                 const secondaryTypeCode = getSecondaryType(scores);
                 const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
-                
                 const response = await fetch(`${API_BASE_URL}/generate-certificate`, {
                     method: 'POST',
                     headers: {
@@ -230,19 +219,27 @@ async function finishTest() {
                         date: new Date().toLocaleDateString()
                     })
                 });
-                
                 if (!response.ok) throw new Error('Ошибка генерации PDF');
-                
-                // Создаем временную ссылку для скачивания
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Сертификат_Голланда_${userName}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
+
+                // Получаем JSON с URL
+                const data = await response.json();
+
+                // Проверяем наличие URL
+                if (!data.url) throw new Error('Ссылка на PDF не найдена');
+
+                // Открываем PDF в новом окне или скачиваем его
+                window.open(data.url, '_blank'); // можно использовать `_self` для открытия в том же окне
+
+                /* 
+                 * Альтернатива: Принудительно скачать файл:
+                const link = document.createElement('a');
+                link.href = data.url;
+                link.download = `Сертификат_Голланда_${userName}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                */
+
             } catch (error) {
                 console.error('Ошибка при скачивании:', error);
                 alert('Не удалось сгенерировать сертификат');
