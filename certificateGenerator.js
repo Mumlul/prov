@@ -1,12 +1,14 @@
 // certificateGenerator.js - Генерация сертификата в формате PDF с изображениями
 
 import { userName, userGroup } from './navigation.js';
-import { jsPDF } from 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-import { html2canvas } from 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
 
 // Функция для генерации сертификата
 export async function generateCertificate(data) {
     try {
+        // Динамически загружаем необходимые библиотеки
+        const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        const html2canvas = await import('https://html2canvas.hertzen.com/dist/html2canvas.min.js');
+        
         // Форматируем данные для вставки в шаблон
         const formattedData = {
             dominantType: data.dominantType,
@@ -140,18 +142,20 @@ export async function generateCertificate(data) {
         document.body.appendChild(tempDiv);
 
         // Используем html2canvas для преобразования HTML в изображение
-        const canvas = await html2canvas(tempDiv.querySelector('.certificate'), {
+        const canvas = await html2canvas.default(tempDiv.querySelector('.certificate'), {
             scale: 2,
             logging: false,
             useCORS: true,
-            allowTaint: true
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: 0
         });
 
         // Удаляем временный элемент
         document.body.removeChild(tempDiv);
 
         // Создаем PDF с помощью jsPDF
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdf = new jsPDF.jsPDF('p', 'mm', 'a4');
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = 210; // ширина A4 в мм
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -163,7 +167,7 @@ export async function generateCertificate(data) {
         
     } catch (error) {
         console.error('Ошибка при создании сертификата:', error);
-        alert('Не удалось сгенерировать сертификат');
+        alert('Не удалось сгенерировать сертификат: ' + error.message);
     }
 }
 
