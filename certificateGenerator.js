@@ -5,10 +5,6 @@ import { userName, userGroup } from './navigation.js';
 // Функция для генерации сертификата
 export async function generateCertificate(data) {
     try {
-        // Динамически загружаем необходимые библиотеки
-        const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-        const html2canvas = await import('https://html2canvas.hertzen.com/dist/html2canvas.min.js');
-        
         // Форматируем данные для вставки в шаблон
         const formattedData = {
             dominantType: data.dominantType,
@@ -89,16 +85,16 @@ export async function generateCertificate(data) {
             </head>
             <body>
                 <div class="certificate">
-                    <!-- Верхнее изображение -->
+                    <!-- Верхний заголовок -->
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="font-weight: bold; font-size: 24px;">УМЦПК</div>
                         <div style="font-size: 16px;">учебный межрегиональный центр подготовки кадров</div>
                     </div>
-                    
+
                     <div class="content">
                         <div class="title">СЕРТИФИКАТ</div>
                         <div class="title">Тест профессиональных предпочтений Голланда</div>
-                        
+
                         <div class="section">
                             <div class="section-title">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</div>
                             <p><strong>ФИО:</strong> ${formattedData.name}</p>
@@ -108,22 +104,22 @@ export async function generateCertificate(data) {
                             <p><strong>Дополнительный тип:</strong> ${formattedData.secondaryType}</p>
                             <p><strong>Описание:</strong> ${formattedData.secondaryDesc}</p>
                         </div>
-                        
+
                         <div class="section">
                             <div class="section-title">РЕЙТИНГ ПО ШКАЛАМ:</div>
                             <pre>${formattedData.scores}</pre>
                         </div>
-                        
+
                         <div class="section">
                             <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ:</div>
                             <p>• ${formattedData.professions}</p>
                         </div>
-                        
+
                         <div class="section">
-                            <p><strong>Дата прохождения теста:</strong> ${formattedData.date}</p>
+                            <p><strong>Дата прохождения:</strong> ${formattedData.date}</p>
                         </div>
                     </div>
-                    
+
                     <!-- Нижний колонтитул -->
                     <div style="position: absolute; bottom: 20px; width: 100%; text-align: center;">
                         <div>УМЦПК - Учебный межрегиональный центр подготовки кадров</div>
@@ -141,39 +137,38 @@ export async function generateCertificate(data) {
         tempDiv.innerHTML = certificateHtml;
         document.body.appendChild(tempDiv);
 
-        // Используем html2canvas для преобразования HTML в изображение
-        const canvas = await html2canvas.default(tempDiv.querySelector('.certificate'), {
-            scale: 2,
-            logging: false,
-            useCORS: true,
-            allowTaint: true,
-            scrollX: 0,
-            scrollY: 0
-        });
+        // Ждём, пока DOM прогрузится
+        setTimeout(async () => {
+            const content = tempDiv.querySelector('.certificate');
 
-        // Удаляем временный элемент
-        document.body.removeChild(tempDiv);
+            // Генерируем canvas из DOM
+            const canvas = await html2canvas(content, {
+                scale: 2,
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+                logging: false
+            });
 
-        // Создаем PDF с помощью jsPDF
-        const pdf = new jsPDF.jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 210; // ширина A4 в мм
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            document.body.removeChild(tempDiv); // Чистим
 
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        
-        // Сохраняем PDF
-        pdf.save(`Сертификат_${formattedData.name.replace(/\s+/g, '_')}.pdf`);
-        
+            // Создаем PDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Сертификат_${formattedData.name.replace(/\s+/g, '_')}.pdf`);
+        }, 500);
+
     } catch (error) {
         console.error('Ошибка при создании сертификата:', error);
         alert('Не удалось сгенерировать сертификат: ' + error.message);
     }
 }
 
-// Форматирование баллов для отображения
 function formatScores(scores) {
-    return scores.map(item => 
-        `${item.type}: ${item.score} баллов`
-    ).join('\n');
+    return scores.map(item => `${item.type}: ${item.score} баллов`).join('\n');
 }
