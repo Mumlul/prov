@@ -1,6 +1,5 @@
-// testLogic.js - Логика тестирования
+// testLogic.js - Логика тестирования по методике Голланда
 import { showResults, userName, userGroup } from './navigation.js';
-import { generateCertificate } from './certificateGenerator.js'; // Импортируем функцию генерации сертификата
 
 // Константы API (если нужно будет вернуться обратно)
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
@@ -12,8 +11,9 @@ const questionElement = document.getElementById('questionContent');
 const nextButton = document.getElementById('next-btn');
 const prevButton = document.getElementById('prev-btn');
 const resultPersonality = document.getElementById('result-personality');
-const resultDescription = document.getElementById('result-description');
-const timeSpentElement = document.getElementById('time-spent');
+const hollandDescription = document.getElementById('holland-description');
+const hollandProfessions = document.getElementById('holland-professions');
+const hollandTimeSpent = document.getElementById('holland-time-spent');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
 
@@ -85,18 +85,6 @@ function updateProgress() {
 
 // Настройка обработчиков кнопок вопроса
 function setupQuestionButtons() {
-    // Обработчик для кнопки "Подробнее"
-    document.querySelectorAll('.more-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = btn.closest('.profession-card');
-            const fullText = card.querySelector('.full');
-            fullText.style.display = fullText.style.display === 'none' ? 'block' : 'none';
-            btn.textContent = fullText.style.display === 'none' ? 'Подробнее' : 'Скрыть';
-        });
-    });
-
-    // Обработчик клика по всей карточке
     document.querySelectorAll('.profession-card').forEach(card => {
         card.addEventListener('click', () => {
             const type = card.dataset.type;
@@ -110,14 +98,6 @@ function setupQuestionButtons() {
             // Выделяем текущую карточку
             card.classList.add('selected');
             nextButton.disabled = false;
-        });
-    });
-
-    // Обработчик для кнопки "Выбрать"
-    document.querySelectorAll('.select-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            btn.closest('.profession-card').click();
         });
     });
 }
@@ -166,87 +146,19 @@ async function finishTest() {
 
     // Отображение основных результатов
     resultPersonality.textContent = `${dominantType} ${secondaryType ? `+ ${secondaryType}` : ''}`;
-    resultDescription.innerHTML = `
-        <p><strong>Описание:</strong> ${personalityInfo.description}</p>
-        <details>
-            <summary>Подробнее о типе</summary>
-            <p>${personalityInfo.fullDescription}</p>
-            <h4>Рекомендуемые профессии:</h4>
-            <ul>
-                ${personalityInfo.recommendedProfessions.map(prof => `<li>${prof}</li>`).join('')}
-            </ul>
-        </details>
-    `;
-    timeSpentElement.textContent = timeSpent;
-
-    // Показываем блок с результатами
-    // showResults();
-    startCareerAnchorsTest();
-
-    // === КНОПКА СКАЧИВАНИЯ СЕРТИФИКАТА ===
-    const downloadSection = document.getElementById('pdf-download-section');
-    if (downloadSection) {
-        downloadSection.innerHTML = `
-            <button id="download-certificate-btn" style="
-                margin-top: 20px;
-                padding: 10px 20px;
-                font-size: 16px;
-                background-color: #007BFF;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            ">
-                Скачать сертификат (PDF)
-            </button>
-        `;
-
-        document.getElementById('download-certificate-btn').addEventListener('click', () => {
-            try {
-                const secondaryTypeCode = getSecondaryType(scores);
-                const secondaryTypeInfo = getPersonalityDescription(secondaryTypeCode);
-
-                const certificateData = {
-                    name: userName,
-                    group: userGroup,
-                    dominantType: dominantType,
-                    dominantDesc: personalityInfo.fullDescription,
-                    secondaryType: secondaryType,
-                    secondaryDesc: secondaryTypeInfo?.fullDescription || "Нет данных",
-                    scores: sortedScores,
-                    professions: personalityInfo.recommendedProfessions,
-                    date: new Date().toLocaleDateString()
-                };
-
-                // Вызываем функцию генерации сертификата
-                generateCertificate(certificateData);
-            } catch (error) {
-                console.error('Ошибка при создании сертификата:', error);
-                alert('Не удалось сгенерировать сертификат');
-            }
-        });
-    } else {
-        console.warn("Контейнер для кнопки сертификата не найден");
+    hollandDescription.innerHTML = personalityInfo.fullDescription;
+    
+    // Формируем список профессий
+    hollandProfessions.innerHTML = personalityInfo.recommendedProfessions
+        .map(prof => `<li>${prof}</li>`)
+        .join('');
+    
+    hollandTimeSpent.textContent = timeSpent;
+    
+    // Переходим ко второму тесту
+    if (window.startCareerAnchorsTest) {
+        window.startCareerAnchorsTest();
     }
-
-    // === ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР (по желанию) ===
-    try {
-        await saveResults({
-            name: userName,
-            personality: personalityType,
-            time: timeSpent,
-            group: userGroup,
-            scores: scores
-        });
-    } catch (error) {
-        console.error("Ошибка при сохранении результатов:", error);
-    }
-}
-
-// Вспомогательная функция для определения второго типа
-function getSecondaryType(scores) {
-    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-    return sorted[1][0]; // Возвращает второй по величине баллов тип
 }
 
 // Вспомогательные функции
@@ -257,7 +169,7 @@ function resetState() {
 
 function updateTimer() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-    timeSpentElement.textContent = timeSpent;
+    hollandTimeSpent.textContent = timeSpent;
 }
 
 async function fetchQuestions() {
@@ -283,71 +195,64 @@ function determinePersonality(scores) {
 function getPersonalityDescription(type) {
     const descriptions = {
         I: {
-            description: "Реалистический тип: Вы ориентированы на работу с вещами, техникой и конкретными объектами.",
-            fullDescription: "Реалистический тип предпочитает работать с вещами, а не с людьми. Это несоциальный, эмоционально-стабильный тип. Люди этого типа хорошо приспосабливаются к обстановке, трудолюбивы, настойчивы и уверены в себе.",
-            recommendedProfessions: ["Инженер", "Механик", "Строитель", "Водитель", "Фермер"]
+            fullDescription: `
+                <p><strong>Реалистический тип:</strong> Вы ориентированы на работу с вещами, техникой и конкретными объектами.</p>
+                <p>Это несоциальный, эмоционально-стабильный тип. Люди этого типа хорошо приспосабливаются к обстановке, трудолюбивы, настойчивы и уверены в себе. Они предпочитают четкие задачи, требующие физической силы, ловкости или механических навыков.</p>
+            `,
+            recommendedProfessions: ["Инженер", "Механик", "Строитель", "Водитель", "Фермер", "Электрик", "Плотник", "Сварщик"]
         },
         II: {
-            description: "Исследовательский тип: Вы любите исследовать идеи и решать сложные задачи.",
-            fullDescription: "Исследовательский тип ориентирован на работу с идеями и вещами. Характеризуется любознательностью, методичностью и аналитическим мышлением.",
-            recommendedProfessions: ["Ученый", "Программист", "Математик", "Биолог", "Физик"]
+            fullDescription: `
+                <p><strong>Исследовательский тип:</strong> Вы любите исследовать идеи и решать сложные задачи.</p>
+                <p>Это аналитический, интеллектуальный тип. Люди этого типа любят наблюдать, учиться, анализировать и решать проблемы. Они предпочитают научные и исследовательские задачи, требующие абстрактного мышления.</p>
+            `,
+            recommendedProfessions: ["Ученый", "Программист", "Математик", "Биолог", "Физик", "Химик", "Аналитик", "Исследователь"]
         },
         III: {
-            description: "Социальный тип: Вы чувствительны к людям и предпочитаете общение и помощь другим.",
-            fullDescription: "Социальный тип ориентирован на общение и взаимодействие с другими людьми. Люди этого типа гуманны, эмпатичны, активны и готовы прийти на помощь.",
-            recommendedProfessions: ["Учитель", "Врач", "Психолог", "Социальный работник", "Тренер"]
+            fullDescription: `
+                <p><strong>Социальный тип:</strong> Вы чувствительны к людям и предпочитаете общение и помощь другим.</p>
+                <p>Это гуманный, эмпатичный тип. Люди этого типа любят работать с другими, обучать, помогать, лечить. Они обладают развитыми коммуникативными навыками и стремятся к социальному взаимодействию.</p>
+            `,
+            recommendedProfessions: ["Учитель", "Врач", "Психолог", "Социальный работник", "Тренер", "Медсестра", "Консультант", "Персонал сферы услуг"]
         },
         IV: {
-            description: "Конвенциональный тип: Вы предпочитаете структурированную, упорядоченную работу.",
-            fullDescription: "Конвенциональный тип выбирает четко структурированную деятельность, связанную с обработкой информации. Люди этого типа аккуратны, пунктуальны, дисциплинированы и добросовестны.",
-            recommendedProfessions: ["Бухгалтер", "Банковский служащий", "Секретарь", "Архивариус", "Аналитик данных"]
+            fullDescription: `
+                <p><strong>Конвенциональный тип:</strong> Вы предпочитаете структурированную, упорядоченную работу.</p>
+                <p>Это организованный, точный тип. Люди этого типа любят работать с данными, документами, цифрами. Они предпочитают четкие инструкции, структурированные задачи и систематический подход.</p>
+            `,
+            recommendedProfessions: ["Бухгалтер", "Банковский служащий", "Секретарь", "Архивариус", "Аналитик данных", "Кассир", "Делопроизводитель", "Финансовый контролер"]
         },
         V: {
-            description: "Предприимчивый тип: Вы энергичны, предприимчивы и любите влиять на других.",
-            fullDescription: "Предприимчивый тип выбирает цели, которые позволяют проявить энергию и энтузиазм. Люди этого типа находчивы, практичны, быстро ориентируются в сложной обстановке.",
-            recommendedProfessions: ["Менеджер", "Предприниматель", "Юрист", "Политик", "Риелтор"]
+            fullDescription: `
+                <p><strong>Предприимчивый тип:</strong> Вы энергичны, предприимчивы и любите влиять на других.</p>
+                <p>Это амбициозный, энергичный тип. Люди этого типа любят руководить, убеждать, достигать целей. Они обладают лидерскими качествами, уверенностью в себе и стремлением к успеху.</p>
+            `,
+            recommendedProfessions: ["Менеджер", "Предприниматель", "Юрист", "Политик", "Риелтор", "Маркетолог", "Продавец", "Руководитель"]
         },
         VI: {
-            description: "Артистический тип: Вы креативны, чувствительны и любите творчество.",
-            fullDescription: "Артистический тип характеризуется богатым воображением, чувствительностью и оригинальностью. Люди этого типа независимы, эмоциональны и предпочитают творческую деятельность.",
-            recommendedProfessions: ["Художник", "Музыкант", "Писатель", "Актер", "Дизайнер"]
+            fullDescription: `
+                <p><strong>Артистический тип:</strong> Вы креативны, чувствительны и любите творчество.</p>
+                <p>Это оригинальный, экспрессивный тип. Люди этого типа любят работать в неструктурированных условиях, используя воображение и творческие способности. Они избегают рутины и ценят самовыражение.</p>
+            `,
+            recommendedProfessions: ["Художник", "Музыкант", "Писатель", "Актер", "Дизайнер", "Фотограф", "Архитектор", "Режиссер"]
         }
     };
     return descriptions[type] || {
-        description: "Не удалось определить ваш тип личности.",
-        fullDescription: "Попробуйте пройти тест еще раз.",
+        fullDescription: "<p>Не удалось определить ваш тип личности. Попробуйте пройти тест еще раз.</p>",
         recommendedProfessions: []
     };
 }
 
 function getDescriptionByType(type) {
     const descriptions = {
-        I: {
-            name: "Реалистический тип",
-            description: "Вы ориентированы на работу с вещами, техникой и конкретными объектами."
-        },
-        II: {
-            name: "Исследовательский тип",
-            description: "Вы любите исследовать идеи и решать сложные задачи."
-        },
-        III: {
-            name: "Социальный тип",
-            description: "Вы чувствительны к людям и предпочитаете общение и помощь другим."
-        },
-        IV: {
-            name: "Конвенциональный тип",
-            description: "Вы предпочитаете структурированную, упорядоченную работу."
-        },
-        V: {
-            name: "Предприимчивый тип",
-            description: "Вы энергичны, предприимчивы и любите влиять на других."
-        },
-        VI: {
-            name: "Артистический тип",
-            description: "Вы креативны, чувствительны и любите творчество."
-        }
+        I: { name: "Реалистический тип" },
+        II: { name: "Исследовательский тип" },
+        III: { name: "Социальный тип" },
+        IV: { name: "Конвенциональный тип" },
+        V: { name: "Предприимчивый тип" },
+        VI: { name: "Артистический тип" }
     };
-    return descriptions[type] || { name: "Неизвестный тип", description: "" };
+    return descriptions[type] || { name: "Неизвестный тип" };
 }
 
 // Инициализация обработчиков

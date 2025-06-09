@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест Голланда - УМЦПК</title>
+    <title>Профориентационный тест - УМЦПК</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -19,31 +19,37 @@
 
     <main>
         <section class="main-content" id="mainContent">
+            <div class="intro-block">
+                <h2>Как проходит тестирование</h2>
+                <p>Тест состоит из двух частей: в первой определяется ваш профессиональный тип по методике Голланда, во второй - карьерные ориентации по методике "Якоря карьеры".</p>
+                <p>Отвечайте интуитивно, выбирая варианты, которые вам ближе. Тест займет около 10-15 минут.</p>
+            </div>
+
             <div class="features">
                 <div class="feature">
                     <h2>Точная диагностика</h2>
-                    <p>Научно обоснованная методика определения профессиональных представлений.</p>
+                    <p>Научно обоснованная методика определения профессиональных предпочтений.</p>
                 </div>
                 
                 <div class="feature">
-                    <h3>Быстрое преломление</h3>
-                    <p>Всего 9-20 минут для получения подробного анализа выявит предпочтение!</p>
+                    <h3>Быстрое прохождение</h3>
+                    <p>Всего 10-15 минут для получения подробного анализа ваших предпочтений!</p>
                 </div>
                 
                 <div class="feature">
                     <h3>Профессиональные рекомендации</h3>
-                    <p>Получатся список профессий, наиболее подходящих заданную тему личности.</p>
+                    <p>Получите список профессий, наиболее подходящих вашему типу личности.</p>
                 </div>
                 
                 <div class="feature">
                     <h3>Экспертная поддержка</h3>
-                    <p>Разработана специалистами УМИЛК с выполнением описания и проборяжениями.</p>
+                    <p>Разработано специалистами УМЦПК с подробным описанием и рекомендациями.</p>
                 </div>
             </div>
 
             <div class="cta-block">
                 <h2>Готовы узнать свою идеальную профессию?</h2>
-                <p>Тест состоит из 42 вопросов. Отвечайте честно и не задумывайтесь долго над ответами.</p>
+                <p>Тест состоит из двух частей. Отвечайте честно и не задумывайтесь долго над ответами.</p>
                 <button class="start-test-btn" id="startTestBtn">Начать тестирование</button>
             </div>
         </section>
@@ -139,7 +145,6 @@
             </div>
         </section>
 
-        <!-- Добавить после quiz-container -->
         <section class="career-anchors-quiz" id="careerAnchorsQuiz" style="display: none;">
             <div class="quiz-header">
                 <button class="back-btn" id="backToFirstTestBtn">Назад</button>
@@ -195,8 +200,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="navigation.js"></script>
-    <script type="module" src="./certificateGenerator.js"></script>
     <script type="module" src="testLogic.js"></script>
+    <script type="module" src="careerAnchors.js"></script>
+    <script type="module" src="certificateGenerator.js"></script>
 </body>
 </html>

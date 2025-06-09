@@ -7,15 +7,13 @@ export async function generateCertificate(data) {
     try {
         // Форматируем данные для вставки в шаблон
         const formattedData = {
-            dominantType: data.dominantType,
-            dominantDesc: data.dominantDesc,
-            secondaryType: data.secondaryType,
-            secondaryDesc: data.secondaryDesc,
-            scores: formatScores(data.scores),
-            professions: data.professions.join('\n• '),
+            name: data.name,
+            group: data.group,
+            hollandType: data.hollandType,
+            hollandDesc: data.hollandDesc,
+            anchorsResults: data.anchorsResults,
             date: data.date,
-            name: userName,
-            group: userGroup
+            professions: data.professions.join('\n• ')
         };
 
         // Создаем HTML-шаблон сертификата
@@ -24,7 +22,7 @@ export async function generateCertificate(data) {
             <html>
             <head>
                 <meta charset="UTF-8">
-                <title>Сертификат теста Голланда</title>
+                <title>Сертификат профориентационного тестирования</title>
                 <style>
                     body {
                         font-family: 'Times New Roman', serif;
@@ -40,9 +38,8 @@ export async function generateCertificate(data) {
                         position: relative;
                         box-sizing: border-box;
                     }
-                    .header-image {
-                        width: 100%;
-                        height: auto;
+                    .header {
+                        text-align: center;
                         margin-bottom: 1cm;
                     }
                     .title {
@@ -62,66 +59,66 @@ export async function generateCertificate(data) {
                         font-size: 12pt;
                         margin-bottom: 0.3cm;
                     }
-                    .footer-image {
-                        width: 100%;
-                        height: auto;
-                        position: absolute;
-                        bottom: 0;
-                        left: 0;
-                    }
-                    .footer-text {
+                    .footer {
                         position: absolute;
                         bottom: 1.5cm;
                         width: 100%;
                         text-align: center;
                         font-size: 10pt;
                     }
-                    .signature {
+                    .two-columns {
                         display: flex;
                         justify-content: space-between;
-                        margin-top: 2cm;
+                    }
+                    .column {
+                        width: 48%;
+                    }
+                    .chart-container {
+                        height: 150px;
+                        margin-top: 10px;
                     }
                 </style>
             </head>
             <body>
                 <div class="certificate">
-                    <!-- Верхний заголовок -->
-                    <div style="text-align: center; margin-bottom: 20px;">
+                    <div class="header">
                         <div style="font-weight: bold; font-size: 24px;">УМЦПК</div>
                         <div style="font-size: 16px;">учебный межрегиональный центр подготовки кадров</div>
                     </div>
 
                     <div class="content">
                         <div class="title">СЕРТИФИКАТ</div>
-                        <div class="title">Тест профессиональных предпочтений Голланда</div>
+                        <div class="title">Результаты профориентационного тестирования</div>
 
                         <div class="section">
-                            <div class="section-title">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</div>
                             <p><strong>ФИО:</strong> ${formattedData.name}</p>
                             <p><strong>Группа/класс:</strong> ${formattedData.group}</p>
-                            <p><strong>Доминирующий тип:</strong> ${formattedData.dominantType}</p>
-                            <p><strong>Описание:</strong> ${formattedData.dominantDesc}</p>
-                            <p><strong>Дополнительный тип:</strong> ${formattedData.secondaryType}</p>
-                            <p><strong>Описание:</strong> ${formattedData.secondaryDesc}</p>
+                            <p><strong>Дата тестирования:</strong> ${formattedData.date}</p>
                         </div>
 
-                        <div class="section">
-                            <div class="section-title">РЕЙТИНГ ПО ШКАЛАМ:</div>
-                            <pre>${formattedData.scores}</pre>
-                        </div>
-
-                        <div class="section">
-                            <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ:</div>
-                            <p>• ${formattedData.professions}</p>
-                        </div>
-
-                        <div class="section">
-                            <p><strong>Дата прохождения:</strong> ${formattedData.date}</p>
+                        <div class="two-columns">
+                            <div class="column">
+                                <div class="section">
+                                    <div class="section-title">ТЕСТ ГОЛЛАНДА</div>
+                                    <p><strong>Тип личности:</strong> ${formattedData.hollandType}</p>
+                                    <p>${formattedData.hollandDesc}</p>
+                                    <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ:</div>
+                                    <p>• ${formattedData.professions}</p>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="section">
+                                    <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
+                                    <p><strong>Ведущие ориентации:</strong></p>
+                                    ${formattedData.anchorsResults.map(item => `
+                                        <p>${item.name}: ${item.score.toFixed(1)}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Нижний колонтитул -->
-                    <div style="position: absolute; bottom: 20px; width: 100%; text-align: center;">
+                    <div class="footer">
                         <div>УМЦПК - Учебный межрегиональный центр подготовки кадров</div>
                         <div>Екатеринбург ИНН: 6670452959 ОГРН: 1176688041724</div>
                     </div>
@@ -160,15 +157,11 @@ export async function generateCertificate(data) {
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`Сертификат_${formattedData.name.replace(/\s+/g, '_')}.pdf`);
+            pdf.save(`Профориентация_${formattedData.name.replace(/\s+/g, '_')}.pdf`);
         }, 500);
 
     } catch (error) {
         console.error('Ошибка при создании сертификата:', error);
         alert('Не удалось сгенерировать сертификат: ' + error.message);
     }
-}
-
-function formatScores(scores) {
-    return scores.map(item => `${item.type}: ${item.score} баллов`).join('\n');
 }
