@@ -73,12 +73,12 @@ const anchorsTimeSpent = document.getElementById('anchors-time-spent');
 const anchorsChart = document.getElementById('anchors-chart');
 
 // Инициализация теста
-window.startCareerAnchorsTest = function () {
+function startCareerAnchorsTest() {
     currentQuestion = 0;
     answers = Array(questions.length).fill(0);
     startTime = Date.now();
     showQuestion();
-};
+}
 
 // Показать текущий вопрос
 function showQuestion() {
