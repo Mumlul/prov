@@ -1,5 +1,6 @@
 // testLogic.js - Логика тестирования по методике Голланда
 import { showResults, userName, userGroup } from './navigation.js';
+import { startCareerAnchorsTest } from './careerAnchors.js';
 
 // Константы API (если нужно будет вернуться обратно)
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
@@ -156,9 +157,10 @@ async function finishTest() {
     hollandTimeSpent.textContent = timeSpent;
     
     // Переходим ко второму тесту
-    if (window.startCareerAnchorsTest) {
-        window.startCareerAnchorsTest();
-    }
+    // if (window.startCareerAnchorsTest) {
+    //     window.startCareerAnchorsTest();
+    // }
+    startCareerAnchorsTest();
 }
 
 // Вспомогательные функции

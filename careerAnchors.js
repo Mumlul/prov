@@ -246,3 +246,5 @@ function getAnchorDescription(key) {
     };
     return descriptions[key] || "Нет описания";
 }
+
+export { startCareerAnchorsTest };
