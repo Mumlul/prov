@@ -157,9 +157,8 @@ async function finishTest() {
     hollandTimeSpent.textContent = timeSpent;
     
     // Переходим ко второму тесту
-    // if (window.startCareerAnchorsTest) {
-    //     window.startCareerAnchorsTest();
-    // }
+    quizContainer.style.display = 'none';
+    careerAnchorsQuiz.style.display = 'block';
     startCareerAnchorsTest();
 }
 
