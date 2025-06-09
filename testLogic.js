@@ -1,6 +1,10 @@
 // testLogic.js - Логика тестирования по методике Голланда
 import { showResults, userName, userGroup } from './navigation.js';
-import { startCareerAnchorsTest } from './careerAnchors.js';
+import { 
+    startCareerAnchorsTest,
+    nextCareerQuestion,
+    prevCareerQuestion 
+} from './careerAnchors.js';
 
 // Константы API (если нужно будет вернуться обратно)
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
@@ -259,3 +263,5 @@ function getDescriptionByType(type) {
 // Инициализация обработчиков
 nextButton.addEventListener('click', nextQuestion);
 prevButton.addEventListener('click', prevQuestion);
+window.nextCareerQuestion = nextCareerQuestion;
+window.prevCareerQuestion = prevCareerQuestion;

@@ -119,7 +119,7 @@ function updateNavButtons() {
 }
 
 // Переход к следующему вопросу
-window.nextCareerQuestion = function () {
+function nextCareerQuestion() {
     if (currentQuestion < questions.length - 1) {
         currentQuestion++;
         showQuestion();
@@ -129,7 +129,7 @@ window.nextCareerQuestion = function () {
 };
 
 // Переход к предыдущему вопросу
-window.prevCareerQuestion = function () {
+function prevCareerQuestion() {
     if (currentQuestion > 0) {
         currentQuestion--;
         showQuestion();
@@ -247,4 +247,8 @@ function getAnchorDescription(key) {
     return descriptions[key] || "Нет описания";
 }
 
-export { startCareerAnchorsTest };
+export { 
+    startCareerAnchorsTest,
+    nextCareerQuestion, 
+    prevCareerQuestion 
+};
