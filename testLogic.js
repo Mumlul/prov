@@ -1,6 +1,6 @@
 // testLogic.js - Логика тестирования
 import { showResults, userName, userGroup } from './navigation.js';
-// import { generateCertificate } from './certificateGenerator.js'; // Импортируем функцию генерации сертификата
+import { generateCertificate } from './certificateGenerator.js'; // Импортируем функцию генерации сертификата
 
 // Константы API (если нужно будет вернуться обратно)
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
