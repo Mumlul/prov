@@ -401,6 +401,77 @@ main {
     margin-bottom: 5px;
 }
 
+.intro-block {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(35, 125, 245, 0.1);
+}
+
+.test-result-block {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border-left: 4px solid #237DF5;
+}
+
+.test-result-block h3 {
+    color: #2337A5;
+    margin-bottom: 15px;
+}
+
+.full-description {
+    margin: 15px 0;
+    line-height: 1.6;
+}
+
+.professions-list {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.professions-list li {
+    margin-bottom: 8px;
+}
+
+.rating-scale {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    justify-content: center;
+    gap: 15px;
+}
+
+.rating-options {
+    display: flex;
+    gap: 5px;
+}
+
+.rating-option {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rating-option:hover {
+    background-color: #f0f7ff;
+    border-color: #237DF5;
+}
+
+.rating-option.selected {
+    background-color: #237DF5;
+    color: white;
+    border-color: #237DF5;
+}
+
 /* Адаптация */
 @media (max-width: 768px) {
     .quiz-container, .user-info-form, .result-container {

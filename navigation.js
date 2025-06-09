@@ -10,6 +10,8 @@ const backBtn = document.getElementById('backBtn');
 const backToFormBtn = document.getElementById('backToFormBtn');
 const submitFormBtn = document.getElementById('submitFormBtn');
 const restartBtn = document.getElementById('restart-btn');
+const careerAnchorsQuiz = document.getElementById('careerAnchorsQuiz');
+const backToFirstTestBtn = document.getElementById('backToFirstTestBtn');
 
 // Экспортируемые переменные
 export let userName = "";
@@ -52,8 +54,30 @@ restartBtn.addEventListener('click', () => {
     }
 });
 
+backToFirstTestBtn.addEventListener('click', () => {
+    careerAnchorsQuiz.style.display = 'none';
+    quizContainer.style.display = 'block';
+});
+
+document.getElementById('career-next-btn').addEventListener('click', () => {
+    if (window.nextCareerQuestion) window.nextCareerQuestion();
+});
+
+document.getElementById('career-prev-btn').addEventListener('click', () => {
+    if (window.prevCareerQuestion) window.prevCareerQuestion();
+});
+
 // Показ результатов (переход от вопросов к результатам)
 export function showResults() {
     quizContainer.style.display = 'none';
+    careerAnchorsQuiz.style.display = 'none';
     resultContainer.style.display = 'block';
+}
+
+function startCareerAnchorsTest() {
+    quizContainer.style.display = 'none';
+    careerAnchorsQuiz.style.display = 'block';
+    if (window.startCareerAnchorsTest) {
+        window.startCareerAnchorsTest();
+    }
 }

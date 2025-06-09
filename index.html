@@ -139,13 +139,55 @@
             </div>
         </section>
 
+        <!-- Добавить после quiz-container -->
+        <section class="career-anchors-quiz" id="careerAnchorsQuiz" style="display: none;">
+            <div class="quiz-header">
+                <button class="back-btn" id="backToFirstTestBtn">Назад</button>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="careerProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="careerProgressText">1/40</div>
+                </div>
+            </div>
+            
+            <div class="question-container">
+                <h3>Оцените важность для вас следующего утверждения:</h3>
+                <div class="statement" id="careerQuestionContent"></div>
+                <div class="rating-scale">
+                    <span>Совсем не важно</span>
+                    <div class="rating-options" id="ratingOptions"></div>
+                    <span>Очень важно</span>
+                </div>
+            </div>
+            
+            <div class="quiz-navigation">
+                <button id="career-prev-btn" class="nav-btn" disabled>← Назад</button>
+                <button id="career-next-btn" class="nav-btn" disabled>Далее →</button>
+            </div>
+        </section>
+
         <section class="result-container" id="resultContainer" style="display: none;">
             <div class="result-content">
                 <h2>Результаты тестирования</h2>
-                <p>Ваш тип личности: <span id="result-personality"></span></p>
-                <div id="result-description"></div>
-                <p>Время прохождения: <span id="time-spent"></span> сек.</p>
-                <button id="pdf-download-section" class="submit-btn">Скачать сертификат</button>
+                
+                <div class="test-result-block">
+                    <h3>Тест профессиональных предпочтений Голланда</h3>
+                    <p><strong>Ваш тип личности:</strong> <span id="result-personality"></span></p>
+                    <div id="holland-description" class="full-description"></div>
+                    <div id="holland-professions" class="professions-list"></div>
+                    <p>Время прохождения: <span id="holland-time-spent"></span> сек.</p>
+                </div>
+                
+                <div class="test-result-block">
+                    <h3>Тест "Якоря карьеры"</h3>
+                    <p><strong>Ведущие ориентации:</strong> <span id="career-anchors-result"></span></p>
+                    <div id="anchors-description" class="full-description"></div>
+                    <div id="anchors-chart" class="chart-container"></div>
+                    <p>Время прохождения: <span id="anchors-time-spent"></span> сек.</p>
+                </div>
+                
+                <button id="download-certificate-btn" class="submit-btn">Скачать полный отчет (PDF)</button>
                 <button id="restart-btn" class="submit-btn">Пройти тест заново</button>
             </div>
         </section>

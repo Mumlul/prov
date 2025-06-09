@@ -180,7 +180,8 @@ async function finishTest() {
     timeSpentElement.textContent = timeSpent;
 
     // Показываем блок с результатами
-    showResults();
+    // showResults();
+    startCareerAnchorsTest();
 
     // === КНОПКА СКАЧИВАНИЯ СЕРТИФИКАТА ===
     const downloadSection = document.getElementById('pdf-download-section');
