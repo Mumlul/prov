@@ -58,6 +58,7 @@ async function loadQuestions() {
 }
 
 
+
 async function fetchQuestions() {
     const response = await fetch(`${API_BASE_URL}${QUESTIONS_ENDPOINT}`);
     if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
