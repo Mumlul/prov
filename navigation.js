@@ -60,8 +60,29 @@ restartBtn.addEventListener('click', () => {
 });
 
 // Показ результатов (переход от вопросов к результатам)
-export function showResults() {
+export async function showResults() {
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'none';
     resultContainer.style.display = 'block';
+    
+    // Добавьте вызов генерации сертификата
+    try {
+        const hollandData = window.prepareHollandCertificateData?.();
+        const anchorsData = window.prepareAnchorsCertificateData?.();
+        
+        if (hollandData && anchorsData) {
+            // Добавляем кнопку для генерации PDF
+            const pdfBtn = document.createElement('button');
+            pdfBtn.textContent = 'Скачать сертификат (PDF)';
+            pdfBtn.className = 'pdf-btn';
+            pdfBtn.onclick = () => generateCertificate(hollandData, anchorsData);
+            
+            const resultFooter = document.querySelector('#resultContainer .footer');
+            if (resultFooter) {
+                resultFooter.appendChild(pdfBtn);
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка при подготовке данных сертификата:', error);
+    }
 }

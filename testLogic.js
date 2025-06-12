@@ -132,12 +132,11 @@ function prevQuestion() {
 }
 
 async function finishTest() {
-    clearInterval(timerInterval); // Останавливаем таймер
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000); // Время в секундах
-    const personalityType = determinePersonality(scores); // Определяем тип личности
-    const personalityInfo = getPersonalityDescription(personalityType); // Получаем описание
+    clearInterval(timerInterval);
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    const personalityType = determinePersonality(scores);
+    const personalityInfo = getPersonalityDescription(personalityType);
 
-    // Сортировка шкал по убыванию баллов
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
             type: getDescriptionByType(type).name,
@@ -145,22 +144,33 @@ async function finishTest() {
         }))
         .sort((a, b) => b.score - a.score);
 
-    // Определяем доминирующий и дополнительный типы
     const dominantType = sortedScores[0].type;
-    const secondaryType = sortedScores[1]?.type || "Нет данных";
+    const secondaryType = sortedScores[1]?.type || "";
 
-    // Отображение основных результатов
-    resultPersonality.textContent = `${dominantType} ${secondaryType ? `+ ${secondaryType}` : ''}`;
+    // Сохраняем результаты
+    try {
+        await saveResults({
+            name: userName,
+            group: userGroup,
+            testType: 'holland',
+            personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
+            time: timeSpent,
+            scores: scores
+        });
+    } catch (error) {
+        console.error("Ошибка при сохранении результатов:", error);
+        // Можно добавить уведомление пользователю
+    }
+
+    // Показываем результаты
+    resultPersonality.textContent = `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`;
     hollandDescription.innerHTML = personalityInfo.fullDescription;
-    
-    // Формируем список профессий
     hollandProfessions.innerHTML = personalityInfo.recommendedProfessions
         .map(prof => `<li>${prof}</li>`)
         .join('');
-    
     hollandTimeSpent.textContent = timeSpent;
     
-    // Переходим ко второму тесту
+    // Переход ко второму тесту
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'block';
     startCareerAnchorsTest();
@@ -258,6 +268,24 @@ function getDescriptionByType(type) {
         VI: { name: "Артистический тип" }
     };
     return descriptions[type] || { name: "Неизвестный тип" };
+}
+
+function prepareHollandCertificateData() {
+    const personalityType = determinePersonality(scores);
+    const personalityInfo = getPersonalityDescription(personalityType);
+    
+    const sortedScores = Object.entries(scores)
+        .map(([type, score]) => ({
+            type: getDescriptionByType(type).name,
+            score
+        }))
+        .sort((a, b) => b.score - a.score);
+
+    return {
+        types: `${sortedScores[0].type}${sortedScores[1] ? ` + ${sortedScores[1].type}` : ''}`,
+        description: personalityInfo.fullDescription.replace(/<[^>]+>/g, ''),
+        professions: personalityInfo.recommendedProfessions
+    };
 }
 
 // Инициализация обработчиков

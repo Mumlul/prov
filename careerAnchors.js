@@ -123,7 +123,7 @@ function prevCareerQuestion() {
 };
 
 // Завершение теста
-function finishCareerTest() {
+async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
     
@@ -139,6 +139,36 @@ function finishCareerTest() {
     
     // Создание графика
     renderChart(results);
+    
+    // Сохраняем результаты
+    try {
+        const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: userName,
+                group: userGroup,
+                testType: 'anchors',
+                time: timeSpent,
+                results: results, // Добавляем полные результаты
+                scores: {
+                    competence: results.find(r => r.name.includes("компетентность"))?.score || 0,
+                    management: results.find(r => r.name.includes("Менеджмент"))?.score || 0,
+                    autonomy: results.find(r => r.name.includes("Автономия"))?.score || 0,
+                    stability: results.find(r => r.name.includes("Стабильность"))?.score || 0,
+                    service: results.find(r => r.name.includes("Служение"))?.score || 0,
+                    challenge: results.find(r => r.name.includes("Вызов"))?.score || 0,
+                    lifestyle: results.find(r => r.name.includes("Интеграция"))?.score || 0,
+                    entrepreneurship: results.find(r => r.name.includes("Предпринимательство"))?.score || 0
+                }
+            })
+        });
+        
+        if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+    } catch (error) {
+        console.error("Ошибка при сохранении результатов:", error);
+        // Можно добавить уведомление пользователю
+    }
     
     // Показываем результаты
     showResults();
@@ -231,6 +261,11 @@ function getAnchorDescription(key) {
         entrepreneurship: "Желание создавать новое, работать на себя. Ориентация на создание собственного бизнеса."
     };
     return descriptions[key] || "Нет описания";
+}
+
+function prepareAnchorsCertificateData() {
+    const results = calculateAnchorsResults();
+    return { results };
 }
 
 export { 
