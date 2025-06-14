@@ -180,7 +180,9 @@ async function finishCareerTest() {
     document.getElementById('download-certificate-btn').style.display = 'inline-block';
     document.getElementById('download-certificate-btn').onclick = () => {
         const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : {};
-    const anchorsData = window.prepareAnchorsCertificateData ? window.prepareAnchorsCertificateData() : {};
+        const anchorsData = window.prepareAnchorsCertificateData ? window.prepareAnchorsCertificateData() : {};
+        console.log('hollandData:', hollandData);
+        console.log('anchorsData:', anchorsData);
         generateCertificate(hollandData, anchorsData);
     };
 }

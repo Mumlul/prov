@@ -117,7 +117,7 @@ function createCertificateHtml(data) {
                         <div class="section">
                             <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
                             <div class="professions-list">
-                                ${data.hollandProfessions.map(p => `<p>• ${p}</p>`).join('')}
+                                ${Array.isArray(data.hollandProfessions) ? data.hollandProfessions.map(p => `<p>• ${p}</p>`).join('') : ''}
                             </div>
                         </div>
                     </div>
