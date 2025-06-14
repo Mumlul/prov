@@ -179,8 +179,8 @@ async function finishCareerTest() {
 
     document.getElementById('download-certificate-btn').style.display = 'inline-block';
     document.getElementById('download-certificate-btn').onclick = () => {
-        const hollandData = window.prepareHollandCertificateData?.();
-        const anchorsData = window.prepareAnchorsCertificateData?.();
+        const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : {};
+    const anchorsData = window.prepareAnchorsCertificateData ? window.prepareAnchorsCertificateData() : {};
         generateCertificate(hollandData, anchorsData);
     };
 }
