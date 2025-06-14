@@ -177,9 +177,10 @@ async function finishCareerTest() {
     showResults();
 
     document.getElementById('download-certificate-btn').style.display = 'inline-block';
-
     document.getElementById('download-certificate-btn').onclick = () => {
-        generatePdfFromHtml(); // предположим, что так называется функция создания PDF
+        const hollandData = window.prepareHollandCertificateData?.();
+        const anchorsData = window.prepareAnchorsCertificateData?.();
+        generateCertificate(hollandData, anchorsData);
     };
 }
 
