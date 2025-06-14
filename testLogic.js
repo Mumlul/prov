@@ -6,7 +6,6 @@ import {
     prevCareerQuestion 
 } from './careerAnchors.js';
 
-// Константы API (если нужно будет вернуться обратно)
 const API_BASE_URL = "https://quiz-server-zsji.onrender.com/api"; 
 const QUESTIONS_ENDPOINT = "/questions";
 const RESULTS_ENDPOINT = "/save";
@@ -21,6 +20,8 @@ const hollandProfessions = document.getElementById('holland-professions');
 const hollandTimeSpent = document.getElementById('holland-time-spent');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
+const quizContainer = document.getElementById('quizContainer');
+const careerAnchorsQuiz = document.getElementById('careerAnchorsQuiz');
 
 // Переменные состояния
 let questions = [];
@@ -95,12 +96,10 @@ function setupQuestionButtons() {
             const type = card.dataset.type;
             scores[type] = (scores[type] || 0) + 1;
 
-            // Снимаем выделение со всех карточек
             document.querySelectorAll('.profession-card').forEach(c => {
                 c.classList.remove('selected');
             });
 
-            // Выделяем текущую карточку
             card.classList.add('selected');
             nextButton.disabled = false;
         });
@@ -147,17 +146,19 @@ async function finishTest() {
     const dominantType = sortedScores[0].type;
     const secondaryType = sortedScores[1]?.type || "";
 
-    // Сохраняем результаты асинхронно без ожидания
-    saveResults({
-        name: userName,
-        group: userGroup,
-        testType: 'holland',
-        personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
-        time: timeSpent,
-        scores: scores
-    }).catch(error => console.error("Ошибка при сохранении результатов:", error));
+    try {
+        await saveResults({
+            name: userName,
+            group: userGroup,
+            testType: 'holland',
+            personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
+            time: timeSpent,
+            scores: scores
+        });
+    } catch (error) {
+        console.error("Ошибка при сохранении результатов:", error);
+    }
 
-    // Показываем результаты
     resultPersonality.textContent = `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`;
     hollandDescription.innerHTML = personalityInfo.fullDescription;
     hollandProfessions.innerHTML = personalityInfo.recommendedProfessions
@@ -165,7 +166,6 @@ async function finishTest() {
         .join('');
     hollandTimeSpent.textContent = timeSpent;
     
-    // Переход ко второму тесту без задержки
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'block';
     startCareerAnchorsTest();
@@ -265,8 +265,7 @@ function getDescriptionByType(type) {
     return descriptions[type] || { name: "Неизвестный тип" };
 }
 
-window.prepareHollandCertificateData()=function()
-    {
+function prepareHollandCertificateData() {
     const personalityType = determinePersonality(scores);
     const personalityInfo = getPersonalityDescription(personalityType);
     
@@ -283,7 +282,9 @@ window.prepareHollandCertificateData()=function()
         professions: personalityInfo.recommendedProfessions
     };
 }
-    window.prepareHollandCertificateData = prepareHollandCertificateData;
+
+// Экспорт функций
+window.prepareHollandCertificateData = prepareHollandCertificateData;
 
 // Инициализация обработчиков
 nextButton.addEventListener('click', nextQuestion);
