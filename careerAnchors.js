@@ -1,5 +1,6 @@
 // careerAnchors.js - Логика теста "Якоря карьеры"
 import { showResults, userName, userGroup } from './navigation.js';
+import { generateCertificate } from './certificateGenerator.js';
 
 let questions = [];
 
