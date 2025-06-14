@@ -77,7 +77,7 @@ export async function showResults() {
             
             // Создаем новую кнопку
             const pdfBtn = document.createElement('button');
-            pdfBtn.textContent = 'Скачать сертификат (PDF)';
+            pdfBtn.textContent = 'Скачать сертификат (PDF) sasha';
             pdfBtn.className = 'pdf-btn submit-btn';
             pdfBtn.style.margin = '10px auto';
             pdfBtn.style.display = 'block';

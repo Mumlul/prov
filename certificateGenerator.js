@@ -1,10 +1,15 @@
 import { userName, userGroup } from './navigation.js';
 
-// Добавляем глобальное объявление для jsPDF
+// Глобальное объявление для jsPDF
 const { jsPDF } = window.jspdf;
 
 export async function generateCertificate(hollandData, anchorsData) {
     try {
+        // Проверка наличия библиотек
+        if (!window.jspdf || !window.html2canvas) {
+            throw new Error('Библиотеки для генерации PDF не загружены');
+        }
+
         // Форматируем дату
         const currentDate = new Date();
         const formattedDate = currentDate.toLocaleDateString('ru-RU', {
@@ -21,8 +26,7 @@ export async function generateCertificate(hollandData, anchorsData) {
             hollandType: hollandData.types,
             hollandDescription: hollandData.description,
             hollandProfessions: hollandData.professions,
-            anchorsResults: anchorsData.results,
-            anchorsChart: null
+            anchorsResults: anchorsData.results
         };
 
         // Создаем HTML-структуру сертификата
@@ -145,48 +149,49 @@ function createCertificateHtml(data) {
 
 async function generatePdfFromHtml(html) {
     return new Promise((resolve, reject) => {
-        // Проверяем наличие необходимых библиотек
-        if (!window.jspdf || !window.html2canvas) {
-            reject(new Error('Не удалось загрузить необходимые библиотеки для генерации PDF'));
-            return;
-        }
-
+        // Создаем временный элемент
         const tempDiv = document.createElement('div');
         tempDiv.style.position = 'fixed';
         tempDiv.style.left = '-9999px';
-        tempDiv.style.top = '0';
         tempDiv.style.width = '210mm';
         tempDiv.style.height = '297mm';
-        tempDiv.style.overflow = 'hidden';
+        tempDiv.style.padding = '20mm';
+        tempDiv.style.boxSizing = 'border-box';
         tempDiv.innerHTML = html;
         document.body.appendChild(tempDiv);
 
         // Даем время для рендеринга
         setTimeout(async () => {
             try {
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const width = pdf.internal.pageSize.getWidth();
-                const height = pdf.internal.pageSize.getHeight();
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
 
+                // Используем html2canvas с настройками
                 const canvas = await html2canvas(tempDiv, {
                     scale: 2,
                     logging: true,
                     useCORS: true,
-                    allowTaint: true,
+                    width: 794, // A4 width in pixels at 96dpi
+                    height: 1123, // A4 height in pixels at 96dpi
                     scrollX: 0,
-                    scrollY: 0,
-                    width: tempDiv.offsetWidth,
-                    height: tempDiv.offsetHeight
+                    scrollY: 0
                 });
 
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+                // Добавляем изображение в PDF
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                
+                // Сохраняем PDF
                 pdf.save(`Профориентация_${userName.replace(/\s+/g, '_')}.pdf`);
                 
+                // Удаляем временный элемент
                 document.body.removeChild(tempDiv);
                 resolve();
             } catch (error) {
-                console.error('Ошибка при генерации PDF:', error);
+                console.error('Ошибка генерации PDF:', error);
                 document.body.removeChild(tempDiv);
                 reject(error);
             }

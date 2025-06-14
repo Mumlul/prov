@@ -127,6 +127,10 @@ async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
     
+    // Добавляем дату и время
+    const now = new Date();
+    const testDateTime = now.toISOString();
+    
     // Отображение результатов
     anchorsResult.textContent = `${results[0].name} (${results[0].score.toFixed(1)}), ${results[1].name} (${results[1].score.toFixed(1)})`;
     
@@ -140,9 +144,9 @@ async function finishCareerTest() {
     // Создание графика
     renderChart(results);
     
-    // Сохраняем результаты асинхронно без ожидания
+    // Сохраняем результаты
     try {
-        await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
+        const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -150,6 +154,7 @@ async function finishCareerTest() {
                 group: userGroup,
                 testType: 'anchors',
                 time: timeSpent,
+                dateTime: testDateTime, // Добавляем дату и время
                 results: results,
                 scores: {
                     competence: results.find(r => r.name.includes("компетентность"))?.score || 0,
@@ -163,11 +168,12 @@ async function finishCareerTest() {
                 }
             })
         });
+        
+        if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
     } catch (error) {
         console.error("Ошибка при сохранении результатов:", error);
     }
     
-    // Показываем результаты без задержки
     showResults();
 }
 
