@@ -175,6 +175,12 @@ async function finishCareerTest() {
     }
     
     showResults();
+
+    document.getElementById('download-certificate-btn').style.display = 'inline-block';
+
+    document.getElementById('download-certificate-btn').onclick = () => {
+        generateAnchorsCertificate(); // предположим, что так называется функция создания PDF
+    };
 }
 
 // Расчет результатов
