@@ -140,9 +140,9 @@ async function finishCareerTest() {
     // Создание графика
     renderChart(results);
     
-    // Сохраняем результаты
+    // Сохраняем результаты асинхронно без ожидания
     try {
-        const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
+        await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -150,7 +150,7 @@ async function finishCareerTest() {
                 group: userGroup,
                 testType: 'anchors',
                 time: timeSpent,
-                results: results, // Добавляем полные результаты
+                results: results,
                 scores: {
                     competence: results.find(r => r.name.includes("компетентность"))?.score || 0,
                     management: results.find(r => r.name.includes("Менеджмент"))?.score || 0,
@@ -163,14 +163,11 @@ async function finishCareerTest() {
                 }
             })
         });
-        
-        if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
     } catch (error) {
         console.error("Ошибка при сохранении результатов:", error);
-        // Можно добавить уведомление пользователю
     }
     
-    // Показываем результаты
+    // Показываем результаты без задержки
     showResults();
 }
 

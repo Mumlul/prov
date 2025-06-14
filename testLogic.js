@@ -147,20 +147,15 @@ async function finishTest() {
     const dominantType = sortedScores[0].type;
     const secondaryType = sortedScores[1]?.type || "";
 
-    // Сохраняем результаты
-    try {
-        await saveResults({
-            name: userName,
-            group: userGroup,
-            testType: 'holland',
-            personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
-            time: timeSpent,
-            scores: scores
-        });
-    } catch (error) {
-        console.error("Ошибка при сохранении результатов:", error);
-        // Можно добавить уведомление пользователю
-    }
+    // Сохраняем результаты асинхронно без ожидания
+    saveResults({
+        name: userName,
+        group: userGroup,
+        testType: 'holland',
+        personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
+        time: timeSpent,
+        scores: scores
+    }).catch(error => console.error("Ошибка при сохранении результатов:", error));
 
     // Показываем результаты
     resultPersonality.textContent = `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`;
@@ -170,7 +165,7 @@ async function finishTest() {
         .join('');
     hollandTimeSpent.textContent = timeSpent;
     
-    // Переход ко второму тесту
+    // Переход ко второму тесту без задержки
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'block';
     startCareerAnchorsTest();

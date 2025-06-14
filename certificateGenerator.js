@@ -1,5 +1,7 @@
-// certificateGenerator.js - Генерация сертификата с результатами обоих тестов
 import { userName, userGroup } from './navigation.js';
+
+// Добавляем глобальное объявление для jsPDF
+const { jsPDF } = window.jspdf;
 
 export async function generateCertificate(hollandData, anchorsData) {
     try {
@@ -20,7 +22,7 @@ export async function generateCertificate(hollandData, anchorsData) {
             hollandDescription: hollandData.description,
             hollandProfessions: hollandData.professions,
             anchorsResults: anchorsData.results,
-            anchorsChart: null // Для графика якорей карьеры
+            anchorsChart: null
         };
 
         // Создаем HTML-структуру сертификата
@@ -143,43 +145,48 @@ function createCertificateHtml(data) {
 
 async function generatePdfFromHtml(html) {
     return new Promise((resolve, reject) => {
-        // Создаем временный элемент для рендеринга
+        // Проверяем наличие необходимых библиотек
+        if (!window.jspdf || !window.html2canvas) {
+            reject(new Error('Не удалось загрузить необходимые библиотеки для генерации PDF'));
+            return;
+        }
+
         const tempDiv = document.createElement('div');
         tempDiv.style.position = 'fixed';
         tempDiv.style.left = '-9999px';
         tempDiv.style.top = '0';
         tempDiv.style.width = '210mm';
+        tempDiv.style.height = '297mm';
+        tempDiv.style.overflow = 'hidden';
         tempDiv.innerHTML = html;
         document.body.appendChild(tempDiv);
 
-        // Ждем загрузки всех ресурсов
+        // Даем время для рендеринга
         setTimeout(async () => {
             try {
-                const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                // Используем html2canvas для преобразования HTML в изображение
+                const width = pdf.internal.pageSize.getWidth();
+                const height = pdf.internal.pageSize.getHeight();
+
                 const canvas = await html2canvas(tempDiv, {
                     scale: 2,
+                    logging: true,
                     useCORS: true,
                     allowTaint: true,
                     scrollX: 0,
                     scrollY: 0,
-                    width: 210 * 3.78, // Конвертируем mm в px (1mm ≈ 3.78px)
-                    height: 297 * 3.78
+                    width: tempDiv.offsetWidth,
+                    height: tempDiv.offsetHeight
                 });
 
-                // Добавляем изображение в PDF
-                const imgData = canvas.toDataURL('image/png');
-                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-                
-                // Сохраняем PDF
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                pdf.addImage(imgData, 'PNG', 0, 0, width, height);
                 pdf.save(`Профориентация_${userName.replace(/\s+/g, '_')}.pdf`);
                 
-                // Удаляем временный элемент
                 document.body.removeChild(tempDiv);
                 resolve();
             } catch (error) {
+                console.error('Ошибка при генерации PDF:', error);
                 document.body.removeChild(tempDiv);
                 reject(error);
             }

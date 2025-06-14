@@ -65,21 +65,41 @@ export async function showResults() {
     careerAnchorsQuiz.style.display = 'none';
     resultContainer.style.display = 'block';
     
-    // Добавьте вызов генерации сертификата
+    // Добавляем кнопку для генерации PDF
     try {
         const hollandData = window.prepareHollandCertificateData?.();
         const anchorsData = window.prepareAnchorsCertificateData?.();
         
         if (hollandData && anchorsData) {
-            // Добавляем кнопку для генерации PDF
+            // Удаляем старую кнопку, если есть
+            const oldBtn = document.querySelector('#resultContainer .pdf-btn');
+            if (oldBtn) oldBtn.remove();
+            
+            // Создаем новую кнопку
             const pdfBtn = document.createElement('button');
             pdfBtn.textContent = 'Скачать сертификат (PDF)';
-            pdfBtn.className = 'pdf-btn';
-            pdfBtn.onclick = () => generateCertificate(hollandData, anchorsData);
+            pdfBtn.className = 'pdf-btn submit-btn';
+            pdfBtn.style.margin = '10px auto';
+            pdfBtn.style.display = 'block';
             
-            const resultFooter = document.querySelector('#resultContainer .footer');
+            // Добавляем обработчик с обработкой ошибок
+            pdfBtn.onclick = async () => {
+                try {
+                    pdfBtn.disabled = true;
+                    pdfBtn.textContent = 'Генерация PDF...';
+                    await generateCertificate(hollandData, anchorsData);
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось сгенерировать PDF. Пожалуйста, попробуйте позже.');
+                } finally {
+                    pdfBtn.disabled = false;
+                    pdfBtn.textContent = 'Скачать сертификат (PDF)';
+                }
+            };
+            
+            const resultFooter = document.querySelector('#resultContainer .result-content');
             if (resultFooter) {
-                resultFooter.appendChild(pdfBtn);
+                resultFooter.insertBefore(pdfBtn, document.getElementById('restart-btn'));
             }
         }
     } catch (error) {
