@@ -20,7 +20,7 @@ const anchors = {
 };
 
 let currentQuestion = 0;
-let answers = Array(questions.length).fill(0);
+let answers = [];
 let startTime;
 
 // Элементы DOM
@@ -38,7 +38,6 @@ const anchorsChart = document.getElementById('anchors-chart');
 // Инициализация теста
 function startCareerAnchorsTest() {
     currentQuestion = 0;
-    answers = Array(questions.length).fill(0);
     startTime = Date.now();
     loadQuestions();
 }
@@ -46,9 +45,12 @@ function startCareerAnchorsTest() {
 async function loadQuestions() {
     try {
         questions = await fetchQuestions();
+        answers = new Array(questions.length).fill(0); // Инициализация массива ответов
+        console.log('Вопросы загружены, количество:', questions.length);
         showQuestion();
     } catch (error) {
         console.error("Ошибка при загрузке вопросов:", error);
+        const quizContainer = document.getElementById('careerAnchorsQuiz');
         quizContainer.innerHTML = `
             <div class="error">
                 <p>Не удалось загрузить вопросы. Пожалуйста, попробуйте позже.</p>
@@ -58,24 +60,21 @@ async function loadQuestions() {
     }
 }
 
-
-
 async function fetchQuestions() {
     const response = await fetch(`${API_BASE_URL}${QUESTIONS_ENDPOINT}`);
     if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-    answers = Array(questions.length).fill(0);
     return await response.json();
 }
 
-// Показать текущий вопрос
 function showQuestion() {
+    if (questions.length === 0 || currentQuestion >= questions.length) return;
+    
     questionElement.textContent = questions[currentQuestion];
     updateProgress();
     renderRatingScale();
     updateNavButtons();
 }
 
-// Отрисовка шкалы оценки
 function renderRatingScale() {
     ratingOptions.innerHTML = '';
     
@@ -85,6 +84,7 @@ function renderRatingScale() {
         option.textContent = i;
         option.addEventListener('click', () => {
             answers[currentQuestion] = i;
+            console.log(`Вопрос ${currentQuestion+1}, ответ: ${i}`);
             renderRatingScale();
             nextButton.disabled = false;
         });
@@ -92,20 +92,17 @@ function renderRatingScale() {
     }
 }
 
-// Обновление прогресса
 function updateProgress() {
     const progress = ((currentQuestion + 1) / questions.length) * 100;
     progressFill.style.width = `${progress}%`;
     progressText.textContent = `${currentQuestion + 1}/${questions.length}`;
 }
 
-// Обновление кнопок навигации
 function updateNavButtons() {
     prevButton.disabled = currentQuestion === 0;
     nextButton.disabled = answers[currentQuestion] === 0;
 }
 
-// Переход к следующему вопросу
 function nextCareerQuestion() {
     if (currentQuestion < questions.length - 1) {
         currentQuestion++;
@@ -113,25 +110,22 @@ function nextCareerQuestion() {
     } else {
         finishCareerTest();
     }
-};
+}
 
-// Переход к предыдущему вопросу
 function prevCareerQuestion() {
     if (currentQuestion > 0) {
         currentQuestion--;
         showQuestion();
     }
-};
+}
 
-// Завершение теста
 async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
     
-    // Добавляем дату и время
-    const now = new Date();
-    const testDateTime = now.toISOString();
-    
+    console.log('Результаты теста:', results);
+    console.log('Все ответы:', answers);
+
     // Отображение результатов
     anchorsResult.textContent = `${results[0].name} (${results[0].score.toFixed(1)}), ${results[1].name} (${results[1].score.toFixed(1)})`;
     
@@ -145,7 +139,7 @@ async function finishCareerTest() {
     // Создание графика
     renderChart(results);
     
-    // Сохраняем результаты
+    // Сохранение результатов
     try {
         const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
             method: 'POST',
@@ -155,7 +149,7 @@ async function finishCareerTest() {
                 group: userGroup,
                 testType: 'anchors',
                 time: timeSpent,
-                dateTime: testDateTime, // Добавляем дату и время
+                dateTime: new Date().toISOString(),
                 results: results,
                 scores: {
                     competence: results.find(r => r.name.includes("компетентность"))?.score || 0,
@@ -175,26 +169,52 @@ async function finishCareerTest() {
         console.error("Ошибка при сохранении результатов:", error);
     }
     
+    // Показ результатов
     showResults();
+    
+    // Настройка кнопки PDF
+    setupPdfButton();
+}
 
-    document.getElementById('download-certificate-btn').style.display = 'inline-block';
-    document.getElementById('download-certificate-btn').onclick = () => {
-        const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : {};
-        const anchorsData = window.prepareAnchorsCertificateData ? window.prepareAnchorsCertificateData() : {};
-        console.log('hollandData:', hollandData);
-        console.log('anchorsData:', anchorsData);
-        generateCertificate(hollandData, anchorsData);
+function setupPdfButton() {
+    const pdfButton = document.getElementById('download-certificate-btn');
+    if (!pdfButton) return;
+    
+    pdfButton.style.display = 'inline-block';
+    pdfButton.onclick = async () => {
+        try {
+            const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : null;
+            const anchorsData = prepareAnchorsCertificateData();
+            
+            console.log('Данные для PDF:', { hollandData, anchorsData });
+            
+            if (!anchorsData?.results || anchorsData.results.length === 0) {
+                throw new Error('Нет данных теста Якорей карьеры');
+            }
+            
+            await generateCertificate(
+                hollandData || { 
+                    types: 'Не определено', 
+                    description: 'Тест Голланда не пройден', 
+                    professions: [] 
+                },
+                anchorsData
+            );
+        } catch (error) {
+            console.error('Ошибка генерации PDF:', error);
+            alert('Ошибка при создании PDF: ' + error.message);
+        }
     };
 }
 
-// Расчет результатов
 function calculateAnchorsResults() {
     const scores = {};
     
     // Рассчитываем средние баллы по каждой ориентации
     for (const [anchor, indexes] of Object.entries(anchors)) {
-        const sum = indexes.reduce((acc, idx) => acc + answers[idx - 1], 0);
-        scores[anchor] = sum / indexes.length;
+        const validIndexes = indexes.filter(idx => idx <= answers.length);
+        const sum = validIndexes.reduce((acc, idx) => acc + (answers[idx - 1] || 0), 0);
+        scores[anchor] = sum / validIndexes.length;
     }
     
     // Преобразуем в массив и сортируем
@@ -207,7 +227,6 @@ function calculateAnchorsResults() {
         .sort((a, b) => b.score - a.score);
 }
 
-// Отрисовка графика
 function renderChart(results) {
     const labels = results.map(item => item.name);
     const data = results.map(item => item.score);
@@ -246,7 +265,6 @@ function renderChart(results) {
     });
 }
 
-// Названия якорей карьеры
 function getAnchorName(key) {
     const names = {
         competence: "Профессиональная компетентность",
@@ -261,7 +279,6 @@ function getAnchorName(key) {
     return names[key] || key;
 }
 
-// Описание якорей карьеры
 function getAnchorDescription(key) {
     const descriptions = {
         competence: "Стремление быть профессионалом, мастером в своем деле. Желание развиваться в конкретной профессиональной области.",
@@ -278,11 +295,13 @@ function getAnchorDescription(key) {
 
 function prepareAnchorsCertificateData() {
     const results = calculateAnchorsResults();
+    console.log('Данные для сертификата (Якоря):', results);
     return { results };
 }
 
 export { 
     startCareerAnchorsTest,
     nextCareerQuestion, 
-    prevCareerQuestion 
+    prevCareerQuestion,
+    prepareAnchorsCertificateData
 };
