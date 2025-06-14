@@ -23,10 +23,10 @@ export async function generateCertificate(hollandData, anchorsData) {
             name: userName,
             group: userGroup,
             date: formattedDate,
-            hollandType: hollandData.types,
-            hollandDescription: hollandData.description,
-            hollandProfessions: hollandData.professions,
-            anchorsResults: anchorsData.results
+            hollandType: hollandData?.types || 'Не определено',
+            hollandDescription: hollandData?.description || 'Тест Холланда не пройден',
+            hollandProfessions: hollandData?.professions || [],
+            anchorsResults: anchorsData?.results || []
         };
 
         // Создаем HTML-структуру сертификата
@@ -126,8 +126,8 @@ function createCertificateHtml(data) {
                         <div class="section">
                             <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
                             ${data.anchorsResults.slice(0, 2).map(item => `
-                                <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
-                                <p>${item.description}</p>
+                            <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
+                            <p>${item.description}</p>
                             `).join('')}
                         </div>
                         

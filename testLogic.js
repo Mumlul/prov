@@ -265,7 +265,8 @@ function getDescriptionByType(type) {
     return descriptions[type] || { name: "Неизвестный тип" };
 }
 
-function prepareHollandCertificateData() {
+window.prepareHollandCertificateData()=function()
+    {
     const personalityType = determinePersonality(scores);
     const personalityInfo = getPersonalityDescription(personalityType);
     
@@ -282,6 +283,7 @@ function prepareHollandCertificateData() {
         professions: personalityInfo.recommendedProfessions
     };
 }
+    window.prepareHollandCertificateData = prepareHollandCertificateData;
 
 // Инициализация обработчиков
 nextButton.addEventListener('click', nextQuestion);
