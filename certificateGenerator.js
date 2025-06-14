@@ -1,16 +1,13 @@
 import { userName, userGroup } from './navigation.js';
 
-// Глобальное объявление для jsPDF
 const { jsPDF } = window.jspdf;
 
 export async function generateCertificate(hollandData, anchorsData) {
     try {
-        // Проверка наличия библиотек
         if (!window.jspdf || !window.html2canvas) {
             throw new Error('Библиотеки для генерации PDF не загружены');
         }
 
-        // Форматируем дату
         const currentDate = new Date();
         const formattedDate = currentDate.toLocaleDateString('ru-RU', {
             day: '2-digit',
@@ -18,7 +15,6 @@ export async function generateCertificate(hollandData, anchorsData) {
             year: 'numeric'
         });
 
-        // Подготавливаем данные для сертификата
         const certificateData = {
             name: userName,
             group: userGroup,
@@ -29,10 +25,7 @@ export async function generateCertificate(hollandData, anchorsData) {
             anchorsResults: anchorsData?.results || []
         };
 
-        // Создаем HTML-структуру сертификата
         const certificateHtml = createCertificateHtml(certificateData);
-        
-        // Генерируем PDF
         await generatePdfFromHtml(certificateHtml);
 
     } catch (error) {
@@ -49,97 +42,157 @@ function createCertificateHtml(data) {
             <meta charset="UTF-8">
             <title>Сертификат профориентации</title>
             <style>
-                body { font-family: 'Times New Roman', serif; margin: 0; padding: 0; }
-                .certificate {
-                    width: 210mm; height: 297mm;
-                    padding: 20mm; box-sizing: border-box;
-                    position: relative;
+                body { 
+                    font-family: 'Times New Roman', serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    background-color: #f5f5f5;
                 }
-                .header { text-align: center; margin-bottom: 15mm; }
+                .certificate-container {
+                    width: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .certificate {
+                    width: 210mm; 
+                    height: 297mm;
+                    padding: 20mm; 
+                    box-sizing: border-box;
+                    position: relative;
+                    background-color: white;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    text-align: center;
+                }
+                .header { 
+                    text-align: center; 
+                    margin-bottom: 15mm; 
+                }
+                .header img {
+                    height: 50px;
+                    margin-bottom: 10px;
+                }
                 .title { 
                     text-align: center; 
                     font-size: 16pt; 
                     font-weight: bold;
                     margin: 10mm 0;
+                    text-transform: uppercase;
                 }
-                .section { margin-bottom: 8mm; }
+                .section { 
+                    margin-bottom: 8mm; 
+                    text-align: center;
+                }
                 .section-title {
                     font-weight: bold;
                     font-size: 12pt;
                     margin-bottom: 3mm;
                     border-bottom: 1px solid #000;
+                    display: inline-block;
+                    padding-bottom: 2mm;
                 }
                 .two-columns {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 10mm;
+                    text-align: left;
                 }
-                .column { width: 48%; }
-                .professions-list { margin-left: 5mm; }
+                .column { 
+                    width: 48%; 
+                }
+                .professions-list { 
+                    margin-left: 5mm; 
+                    text-align: left;
+                }
                 .footer {
                     position: absolute;
                     bottom: 15mm;
-                    width: calc(100% - 40mm);
+                    left: 0;
+                    right: 0;
                     text-align: center;
                     font-size: 10pt;
+                }
+                .footer img {
+                    height: 40px;
+                    margin-top: 5mm;
                 }
                 .chart-container {
                     width: 100%;
                     height: 120px;
                     margin-top: 5mm;
                 }
+                .center-text {
+                    text-align: center;
+                }
+                .signature-line {
+                    margin-top: 20mm;
+                    border-top: 1px solid #000;
+                    width: 60mm;
+                    display: inline-block;
+                    padding-top: 2mm;
+                }
             </style>
         </head>
         <body>
-            <div class="certificate">
-                <div class="header">
-                    <div style="font-size: 24pt; font-weight: bold;">УМЦПК</div>
-                    <div style="font-size: 14pt;">Учебный межрегиональный центр подготовки кадров</div>
-                </div>
+            <div class="certificate-container">
+                <div class="certificate">
+                    <div class="header">
+                        <!-- Вставьте верхний колонтитул (логотип) здесь -->
+                        <img src="images/up.png" alt="Логотип">
+                        <div style="font-size: 24pt; font-weight: bold;">УМЦПК</div>
+                        <div style="font-size: 14pt;">Учебный межрегиональный центр подготовки кадров</div>
+                    </div>
 
-                <div class="title">СЕРТИФИКАТ</div>
-                <div class="title">результатов профориентационного тестирования</div>
+                    <div class="title">СЕРТИФИКАТ</div>
+                    <div class="title">результатов профориентационного тестирования</div>
 
-                <div class="section">
-                    <p><strong>ФИО:</strong> ${data.name}</p>
-                    <p><strong>Группа/класс:</strong> ${data.group}</p>
-                    <p><strong>Дата тестирования:</strong> ${data.date}</p>
-                </div>
+                    <div class="section">
+                        <p><strong>ФИО:</strong> ${data.name}</p>
+                        <p><strong>Группа/класс:</strong> ${data.group}</p>
+                        <p><strong>Дата тестирования:</strong> ${data.date}</p>
+                    </div>
 
-                <div class="two-columns">
-                    <div class="column">
-                        <div class="section">
-                            <div class="section-title">МЕТОДИКА ГОЛЛАНДА</div>
-                            <p><strong>Тип личности:</strong> ${data.hollandType}</p>
-                            <p>${data.hollandDescription}</p>
+                    <div class="two-columns">
+                        <div class="column">
+                            <div class="section">
+                                <div class="section-title">МЕТОДИКА ГОЛЛАНДА</div>
+                                <p><strong>Тип личности:</strong> ${data.hollandType}</p>
+                                <p>${data.hollandDescription}</p>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
+                                <div class="professions-list">
+                                    ${Array.isArray(data.hollandProfessions) ? data.hollandProfessions.map(p => `<p>• ${p}</p>`).join('') : ''}
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div class="section">
-                            <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
-                            <div class="professions-list">
-                                ${Array.isArray(data.hollandProfessions) ? data.hollandProfessions.map(p => `<p>• ${p}</p>`).join('') : ''}
+
+                        <div class="column">
+                            <div class="section">
+                                <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
+                                ${data.anchorsResults.slice(0, 2).map(item => `
+                                <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
+                                <p>${item.description}</p>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="chart-container">
+                                <!-- График будет вставлен здесь -->
                             </div>
                         </div>
                     </div>
 
-                    <div class="column">
-                        <div class="section">
-                            <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
-                            ${data.anchorsResults.slice(0, 2).map(item => `
-                            <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
-                            <p>${item.description}</p>
-                            `).join('')}
-                        </div>
-                        
-                        <div class="chart-container">
-                            <!-- График будет вставлен здесь -->
-                        </div>
+                    <div class="footer">
+                        <!-- Вставьте нижний колонтитул здесь -->
+                        <img src="images/down.png" alt="Логотип">
+                        <div>Учебный межрегиональный центр подготовки кадров</div>
+                        <div>Екатеринбург, ИНН: 6670452959, ОГРН: 1176688041724</div>
                     </div>
-                </div>
-
-                <div class="footer">
-                    <div>Учебный межрегиональный центр подготовки кадров</div>
-                    <div>Екатеринбург, ИНН: 6670452959, ОГРН: 1176688041724</div>
                 </div>
             </div>
         </body>
@@ -149,7 +202,6 @@ function createCertificateHtml(data) {
 
 async function generatePdfFromHtml(html) {
     return new Promise((resolve, reject) => {
-        // Создаем временный элемент
         const tempDiv = document.createElement('div');
         tempDiv.style.position = 'fixed';
         tempDiv.style.left = '-9999px';
@@ -160,7 +212,6 @@ async function generatePdfFromHtml(html) {
         tempDiv.innerHTML = html;
         document.body.appendChild(tempDiv);
 
-        // Даем время для рендеринга
         setTimeout(async () => {
             try {
                 const pdf = new jsPDF({
@@ -169,25 +220,21 @@ async function generatePdfFromHtml(html) {
                     format: 'a4'
                 });
 
-                // Используем html2canvas с настройками
                 const canvas = await html2canvas(tempDiv, {
                     scale: 2,
                     logging: true,
                     useCORS: true,
-                    width: 794, // A4 width in pixels at 96dpi
-                    height: 1123, // A4 height in pixels at 96dpi
+                    width: 794,
+                    height: 1123,
                     scrollX: 0,
                     scrollY: 0
                 });
 
-                // Добавляем изображение в PDF
                 const imgData = canvas.toDataURL('image/png');
                 pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
                 
-                // Сохраняем PDF
                 pdf.save(`Профориентация_${userName.replace(/\s+/g, '_')}.pdf`);
                 
-                // Удаляем временный элемент
                 document.body.removeChild(tempDiv);
                 resolve();
             } catch (error) {
