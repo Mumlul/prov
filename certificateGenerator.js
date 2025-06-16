@@ -59,138 +59,146 @@ function createCertificateHtml(data) {
                     background-color: #ffffff;
                 }
                 .header {
-                    padding: 15px 0;
-                    border-bottom: 1px solid #000;
+                    padding: 0;
+                    height: 100px;
+                    text-align: center;
                 }
-                .header-content {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .header-text {
-                    line-height: 1.2;
-                    font-size: 10pt;
+                .header img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
                 }
                 .footer {
                     padding: 10px 0;
-                    border-top: 1px solid #000;
+                    height: 60px;
                     text-align: center;
-                    font-size: 9pt;
+                }
+                .footer img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
                 }
                 .document-body {
-                    padding: 20px 2cm;
+                    padding: 10px 2cm;
+                }
+                .center-text {
+                    text-align: center;
+                }
+                .umcpk-title {
+                    font-weight: bold;
+                    font-size: 24pt;
+                    margin: 5px 0;
+                }
+                .umcpk-subtitle {
+                    font-size: 12pt;
+                    margin-bottom: 20px;
                 }
                 .certificate-title {
                     text-align: center;
                     font-weight: bold;
                     font-size: 16pt;
-                    margin: 20px 0;
+                    margin: 10px 0;
                     text-transform: uppercase;
                 }
                 .subtitle {
                     text-align: center;
                     font-size: 14pt;
-                    margin-bottom: 30px;
+                    margin-bottom: 20px;
                 }
                 .user-info {
-                    margin-bottom: 30px;
+                    margin-bottom: 20px;
                 }
                 .section {
-                    margin-bottom: 25px;
+                    margin-bottom: 15px;
                 }
                 .section-title {
                     font-weight: bold;
                     font-size: 12pt;
-                    margin-bottom: 10px;
+                    margin-bottom: 5px;
                     text-transform: uppercase;
                 }
                 .professions-list {
                     padding-left: 20px;
-                    margin-top: 10px;
+                    margin-top: 5px;
                 }
                 .professions-list li {
-                    margin-bottom: 5px;
+                    margin-bottom: 3px;
                 }
                 .signature {
-                    margin-top: 50px;
+                    margin-top: 30px;
                     text-align: right;
                 }
                 .signature-image {
                     width: 50mm;
-                    height: 35mm;
+                    height: 20mm;
                     float: right;
                     margin-left: 20px;
                 }
-                .logo {
-                    height: 80px;
-                }
-                .footer-logo {
-                    height: 50px;
-                    margin-bottom: 5px;
+                .compact {
+                    margin: 5px 0;
                 }
             </style>
         </head>
         <body>
 
-            <!-- Верхний колонтитул -->
+            <!-- Верхний колонтитул (только лого) -->
             <div class="header">
-                <div class="header-content">
-                    <div class="header-text">
-                        <p>Учебный<br>межрегиональный<br>центр подготовки<br>кадров</p>
-                        <p>ИНН: 6670452959<br>ОГРН: 1176688041724</p>
-                        <p>г. Екатеринбург</p>
-                    </div>
-                    <img src="images/up.png" alt="Логотип компании" class="logo">
-                </div>
+                <img src="images/up.png" alt="Логотип УМЦПК">
             </div>
 
             <!-- Основное содержимое -->
             <div class="document-body">
 
+                <div class="center-text">
+                    <div class="umcpk-title">УМЦПК</div>
+                    <div class="umcpk-subtitle">Учебный межрегиональный центр подготовки кадров</div>
+                </div>
+
                 <div class="certificate-title">СЕРТИФИКАТ</div>
                 <div class="subtitle">результатов профориентационного тестирования</div>
 
                 <div class="user-info">
-                    <p><strong>ФИО:</strong> ${data.name}</p>
-                    <p><strong>Группа/класс:</strong> ${data.group}</p>
-                    <p><strong>Дата тестирования:</strong> ${data.date}</p>
+                    <p class="compact"><strong>ФИО:</strong> ${data.name}</p>
+                    <p class="compact"><strong>Группа/класс:</strong> ${data.group}</p>
+                    <p class="compact"><strong>Дата тестирования:</strong> ${data.date}</p>
                 </div>
 
                 <div class="section">
                     <div class="section-title">МЕТОДИКА ГОЛЛАНДА</div>
-                    <p><strong>Тип личности:</strong> ${data.hollandType || 'Не определено'}</p>
-                    ${data.hollandDescription ? `<p>${data.hollandDescription}</p>` : ''}
-                    
-                    ${Array.isArray(data.hollandProfessions) && data.hollandProfessions.length > 0 ? `
-                        <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
-                        <ul class="professions-list">
-                            ${data.hollandProfessions.map(p => `<li>${p}</li>`).join('')}
-                        </ul>
-                    ` : ''}
+                    <p class="compact"><strong>Тип личности:</strong> ${data.hollandType || 'Не определено'}</p>
+                    ${data.hollandDescription ? `<p class="compact">${data.hollandDescription}</p>` : ''}
                 </div>
 
+                ${Array.isArray(data.hollandProfessions) && data.hollandProfessions.length > 0 ? `
+                <div class="section">
+                    <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
+                    <ul class="professions-list">
+                        ${data.hollandProfessions.slice(0, 5).map(p => `<li class="compact">${p}</li>`).join('')}
+                        ${data.hollandProfessions.length > 5 ? '<li class="compact">...</li>' : ''}
+                    </ul>
+                </div>
+                ` : ''}
+
+                ${Array.isArray(data.anchorsResults) && data.anchorsResults.length > 0 ? `
                 <div class="section">
                     <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
-                    ${Array.isArray(data.anchorsResults) && data.anchorsResults.length > 0
-                        ? data.anchorsResults.map(item => `
-                            <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
-                            <p>${item.description}</p>
-                        `).join('')
-                        : '<p>Нет данных</p>'
-                    }
+                    ${data.anchorsResults.slice(0, 3).map(item => `
+                        <p class="compact"><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
+                        ${item.description ? `<p class="compact">${item.description.substring(0, 100)}...</p>` : ''}
+                    `).join('')}
                 </div>
+                ` : ''}
 
                 <div class="signature">
-                    <img src="images/down.png" alt="Подпись" class="signature-image">
-                    <p>Директор ООО «УМЦПК» Т.В. Плоских</p>
+                    <img src="signature.png" alt="Подпись" class="signature-image">
+                    <p class="compact">Директор ООО «УМЦПК» Т.В. Плоских</p>
                 </div>
 
             </div>
 
-            <!-- Нижний колонтитул -->
+            <!-- Нижний колонтитул (только лого) -->
             <div class="footer">
-                <img src="footer-logo.png" alt="Логотип подвала" class="footer-logo">
-                <p>Тел.: +7 (800) 550-92-42 | Email: info@umcpk.ru | www.umcpk.ru</p>
+                <img src="images/down.png" alt="Контакты УМЦПК">
             </div>
 
         </body>
