@@ -17,7 +17,67 @@ const restartBtn = document.getElementById('restart-btn');
 export let userName = "";
 export let userGroup = "";
 
-// Инициализация
+// Функция проверки формы
+function validateForm() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const school = document.getElementById('school').value.trim();
+    const fullNameError = document.getElementById('fullNameError');
+    const schoolError = document.getElementById('schoolError');
+    let isValid = true;
+
+    // Сброс ошибок
+    fullNameError.textContent = '';
+    schoolError.textContent = '';
+
+    // Проверка ФИО
+    if (!fullName) {
+        fullNameError.textContent = 'Пожалуйста, введите ФИО';
+        isValid = false;
+    }
+
+    // Проверка школы
+    if (!school) {
+        schoolError.textContent = 'Пожалуйста, укажите школу';
+        isValid = false;
+    } else {
+        // Проверка наличия школы в списке
+        const schoolsList = document.getElementById('schoolsList').options;
+        let schoolExists = false;
+
+        for (let i = 0; i < schoolsList.length; i++) {
+            if (school === schoolsList[i].value) {
+                schoolExists = true;
+                break;
+            }
+        }
+
+        if (!schoolExists) {
+            schoolError.textContent = 'Выберите школу из списка';
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
+// Обработчик кнопки "Продолжить к тестированию"
+submitFormBtn.addEventListener('click', () => {
+    if (!validateForm()) {
+        return; // Не продолжать, если форма невалидна
+    }
+
+    userName = document.getElementById('fullName').value.trim() || "Аноним";
+    userGroup = document.getElementById('school').value.trim() || "Неизвестно";
+    
+    userInfoForm.style.display = 'none';
+    quizContainer.style.display = 'block';
+    
+    if (window.initTest) {
+        window.initTest();
+    }
+});
+
+// Остальные обработчики (без изменений)
 startTestBtn.addEventListener('click', () => {
     mainContent.style.display = 'none';
     userInfoForm.style.display = 'block';
@@ -38,18 +98,6 @@ backToFirstTestBtn.addEventListener('click', () => {
     quizContainer.style.display = 'block';
 });
 
-submitFormBtn.addEventListener('click', () => {
-    userName = document.getElementById('fullName').value.trim() || "Аноним";
-    userGroup = document.getElementById('school').value.trim() || "Неизвестно";
-    
-    userInfoForm.style.display = 'none';
-    quizContainer.style.display = 'block';
-    
-    if (window.initTest) {
-        window.initTest();
-    }
-});
-
 restartBtn.addEventListener('click', () => {
     resultContainer.style.display = 'none';
     userInfoForm.style.display = 'block';
@@ -59,30 +107,26 @@ restartBtn.addEventListener('click', () => {
     }
 });
 
-// Показ результатов (переход от вопросов к результатам)
+// Показ результатов (без изменений)
 export async function showResults() {
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'none';
     resultContainer.style.display = 'block';
     
-    // Добавляем кнопку для генерации PDF
     try {
         const hollandData = window.prepareHollandCertificateData?.();
         const anchorsData = window.prepareAnchorsCertificateData?.();
         
         if (hollandData && anchorsData) {
-            // Удаляем старую кнопку, если есть
             const oldBtn = document.querySelector('#resultContainer .pdf-btn');
             if (oldBtn) oldBtn.remove();
             
-            // Создаем новую кнопку
             const pdfBtn = document.createElement('button');
-            pdfBtn.textContent = 'Скачать сертификат (PDF) sasha';
+            pdfBtn.textContent = 'Скачать сертификат (PDF)';
             pdfBtn.className = 'pdf-btn submit-btn';
             pdfBtn.style.margin = '10px auto';
             pdfBtn.style.display = 'block';
             
-            // Добавляем обработчик с обработкой ошибок
             pdfBtn.onclick = async () => {
                 try {
                     pdfBtn.disabled = true;

@@ -464,3 +464,14 @@ main {
 #restart-btn:hover {
     background-color: #e67e22;
 }
+
+.error-message {
+    color: red;
+    font-size: 0.8em;
+    margin-top: 5px;
+    display: block;
+}
+
+input:invalid {
+    border-color: red;
+}

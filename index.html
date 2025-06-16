@@ -66,6 +66,7 @@
                     <div class="form-group">
                         <label for="fullName">Фамилия, Имя, Отчество *</label>
                         <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
+                        <span class="error-message" id="fullNameError"></span>
                     </div>
                     
                     <div class="form-group">
@@ -117,6 +118,7 @@
                             <option value="МБОУ СОШ № 57">
                             <option value="МАОУ СОШ № 87">
                         </datalist>
+                        <span class="error-message" id="schoolError"></span>
                     </div>
                     
                     <button type="button" class="submit-btn" id="submitFormBtn">Продолжить к тестированию</button>
