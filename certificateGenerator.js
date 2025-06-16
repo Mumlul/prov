@@ -140,7 +140,7 @@ function createCertificateHtml(data) {
                         <p>ИНН: 6670452959<br>ОГРН: 1176688041724</p>
                         <p>г. Екатеринбург</p>
                     </div>
-                    <img src="logo.png" alt="Логотип компании" class="logo">
+                    <img src="images/up.png" alt="Логотип компании" class="logo">
                 </div>
             </div>
 
@@ -181,7 +181,7 @@ function createCertificateHtml(data) {
                 </div>
 
                 <div class="signature">
-                    <img src="signature.png" alt="Подпись" class="signature-image">
+                    <img src="images/down.png" alt="Подпись" class="signature-image">
                     <p>Директор ООО «УМЦПК» Т.В. Плоских</p>
                 </div>
 
