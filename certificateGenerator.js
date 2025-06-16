@@ -44,8 +44,7 @@ function createCertificateHtml(data) {
         <html lang="ru">
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Сертификат о прохождении тестирования</title>
+            <title>Сертификат профориентации</title>
             <style>
                 @page {
                     size: A4;
@@ -55,44 +54,72 @@ function createCertificateHtml(data) {
                     font-family: 'Times New Roman', Times, serif;
                     margin: 0;
                     padding: 0;
-                    line-height: 1.5;
-                    font-size: 14pt;
-                    padding-top: 120px;
-                    padding-bottom: 100px;
+                    line-height: 1.3;
+                    font-size: 12pt;
                     background-color: #ffffff;
                 }
                 .header {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 120px;
+                    padding: 15px 0;
                     border-bottom: 1px solid #000;
+                }
+                .header-content {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 15px;
-                    box-sizing: border-box;
-                    background-color: #ffffff;
                 }
-                .footer {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 80px;
-                    border-top: 1px solid #000;
-                    text-align: center;
-                    padding: 10px;
-                    box-sizing: border-box;
-                    background-color: #ffffff;
+                .header-text {
+                    line-height: 1.2;
                     font-size: 10pt;
                 }
-                .content {
-                    padding: 0 2cm;
-                    min-height: calc(100vh - 220px);
-                    display: flex;
-                    flex-direction: column;
+                .footer {
+                    padding: 10px 0;
+                    border-top: 1px solid #000;
+                    text-align: center;
+                    font-size: 9pt;
+                }
+                .document-body {
+                    padding: 20px 2cm;
+                }
+                .certificate-title {
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 16pt;
+                    margin: 20px 0;
+                    text-transform: uppercase;
+                }
+                .subtitle {
+                    text-align: center;
+                    font-size: 14pt;
+                    margin-bottom: 30px;
+                }
+                .user-info {
+                    margin-bottom: 30px;
+                }
+                .section {
+                    margin-bottom: 25px;
+                }
+                .section-title {
+                    font-weight: bold;
+                    font-size: 12pt;
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                }
+                .professions-list {
+                    padding-left: 20px;
+                    margin-top: 10px;
+                }
+                .professions-list li {
+                    margin-bottom: 5px;
+                }
+                .signature {
+                    margin-top: 50px;
+                    text-align: right;
+                }
+                .signature-image {
+                    width: 50mm;
+                    height: 35mm;
+                    float: right;
+                    margin-left: 20px;
                 }
                 .logo {
                     height: 80px;
@@ -101,109 +128,71 @@ function createCertificateHtml(data) {
                     height: 50px;
                     margin-bottom: 5px;
                 }
-                .document-title {
-                    text-align: center;
-                    font-size: 16pt;
-                    font-weight: bold;
-                    margin: 20px 0;
-                    text-transform: uppercase;
-                }
-                .user-info {
-                    margin-bottom: 30px;
-                }
-                .test-results {
-                    margin-bottom: 20px;
-                }
-                .result-item {
-                    margin-bottom: 15px;
-                }
-                .result-title {
-                    font-weight: bold;
-                }
-                .signature-area {
-                    margin-top: auto;
-                    text-align: right;
-                    padding-top: 50px;
-                }
-                .signature-image {
-                    width: 50mm;
-                    height: 35mm;
-                    margin-left: 20px;
-                    margin-bottom: 10px;
-                }
-                .date {
-                    margin-top: 30px;
-                }
-                .qr-code {
-                    width: 50mm;
-                    height: 50mm;
-                    margin: 20px auto;
-                }
             </style>
         </head>
         <body>
-            <!-- Шапка документа -->
+
+            <!-- Верхний колонтитул -->
             <div class="header">
-                <div>
-                    <p>ООО «Учебно-методический центр профессиональных квалификаций»</p>
-                    <p>ИНН 1234567890, КПП 123456789</p>
-                    <p>123456, г. Москва, ул. Образцовая, д. 1</p>
+                <div class="header-content">
+                    <div class="header-text">
+                        <p>Учебный<br>межрегиональный<br>центр подготовки<br>кадров</p>
+                        <p>ИНН: 6670452959<br>ОГРН: 1176688041724</p>
+                        <p>г. Екатеринбург</p>
+                    </div>
+                    <img src="logo.png" alt="Логотип компании" class="logo">
                 </div>
-                <img src="logo.png" alt="Логотип компании" class="logo">
             </div>
 
             <!-- Основное содержимое -->
-            <div class="content">
-                <div class="document-title">СЕРТИФИКАТ</div>
-                
+            <div class="document-body">
+
+                <div class="certificate-title">СЕРТИФИКАТ</div>
+                <div class="subtitle">результатов профориентационного тестирования</div>
+
                 <div class="user-info">
-                    <p>Настоящим удостоверяется, что</p>
-                    <p><strong>${data.userName}</strong></p>
-                    <p>успешно прошел(а) профессиональное тестирование</p>
+                    <p><strong>ФИО:</strong> ${data.name}</p>
+                    <p><strong>Группа/класс:</strong> ${data.group}</p>
+                    <p><strong>Дата тестирования:</strong> ${data.date}</p>
                 </div>
-                
-                <div class="test-results">
-                    <div class="result-item">
-                        <p class="result-title">Результаты теста "Якоря карьеры":</p>
-                        <div id="anchors-results">
-                            ${data.anchorsResults.map(item => `
-                                <p>${item.name}: ${item.score.toFixed(1)}</p>
-                                <p>${item.description}</p>
-                            `).join('')}
-                        </div>
-                    </div>
+
+                <div class="section">
+                    <div class="section-title">МЕТОДИКА ГОЛЛАНДА</div>
+                    <p><strong>Тип личности:</strong> ${data.hollandType || 'Не определено'}</p>
+                    ${data.hollandDescription ? `<p>${data.hollandDescription}</p>` : ''}
                     
-                    <div class="result-item">
-                        <p class="result-title">Результаты теста Голланда:</p>
-                        <div id="holland-results">
-                            <p>Тип: ${data.hollandType}</p>
-                            <p>${data.hollandDescription}</p>
-                            ${data.hollandProfessions.length > 0 ? `
-                                <p>Рекомендуемые профессии:</p>
-                                <ul>
-                                    ${data.hollandProfessions.map(prof => `<li>${prof}</li>`).join('')}
-                                </ul>
-                            ` : ''}
-                        </div>
-                    </div>
+                    ${Array.isArray(data.hollandProfessions) && data.hollandProfessions.length > 0 ? `
+                        <div class="section-title">РЕКОМЕНДУЕМЫЕ ПРОФЕССИИ</div>
+                        <ul class="professions-list">
+                            ${data.hollandProfessions.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    ` : ''}
                 </div>
-                
-                <div class="date">
-                    <p>Дата выдачи: ${data.date}</p>
+
+                <div class="section">
+                    <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
+                    ${Array.isArray(data.anchorsResults) && data.anchorsResults.length > 0
+                        ? data.anchorsResults.map(item => `
+                            <p><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
+                            <p>${item.description}</p>
+                        `).join('')
+                        : '<p>Нет данных</p>'
+                    }
                 </div>
-                
-                <div class="signature-area">
+
+                <div class="signature">
                     <img src="signature.png" alt="Подпись" class="signature-image">
-                    <p>Директор ООО «УМЦПК»</p>
-                    <p>Т.В. Плоских</p>
+                    <p>Директор ООО «УМЦПК» Т.В. Плоских</p>
                 </div>
+
             </div>
 
-            <!-- Подвал документа -->
+            <!-- Нижний колонтитул -->
             <div class="footer">
                 <img src="footer-logo.png" alt="Логотип подвала" class="footer-logo">
-                <p>Тел.: +7 (123) 456-78-90 | Email: info@umcpk.ru | www.umcpk.ru</p>
+                <p>Тел.: +7 (800) 550-92-42 | Email: info@umcpk.ru | www.umcpk.ru</p>
             </div>
+
         </body>
         </html>
     `;
@@ -242,7 +231,7 @@ async function generatePdfFromHtml(html) {
                 const imgData = canvas.toDataURL('image/png');
                 pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
                 
-                pdf.save(`Сертификат_${userName.replace(/\s+/g, '_')}.pdf`);
+                pdf.save(`Профориентация_${userName.replace(/\s+/g, '_')}.pdf`);
                 
                 document.body.removeChild(tempDiv);
                 resolve();
