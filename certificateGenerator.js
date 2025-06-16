@@ -60,26 +60,31 @@ function createCertificateHtml(data) {
                 }
                 .header {
                     padding: 0;
+                    margin: 0;
+                    width: 100%;
                     height: 100px;
-                    text-align: center;
                 }
                 .header img {
                     width: 100%;
                     height: 100%;
-                    object-fit: contain;
+                    object-fit: cover;
+                    display: block;
                 }
                 .footer {
-                    padding: 10px 0;
+                    padding: 0;
+                    margin: 0;
+                    width: 100%;
                     height: 60px;
-                    text-align: center;
                 }
                 .footer img {
                     width: 100%;
                     height: 100%;
-                    object-fit: contain;
+                    object-fit: cover;
+                    display: block;
                 }
                 .document-body {
                     padding: 10px 2cm;
+                    margin: 0;
                 }
                 .center-text {
                     text-align: center;
@@ -143,16 +148,11 @@ function createCertificateHtml(data) {
 
             <!-- Верхний колонтитул (только лого) -->
             <div class="header">
-                <img src="images/up.png" alt="Логотип УМЦПК">
+                <img src="images/up.png" alt="Шапка УМЦПК" style="margin: 0; padding: 0;">
             </div>
 
             <!-- Основное содержимое -->
             <div class="document-body">
-
-                <div class="center-text">
-                    <div class="umcpk-title">УМЦПК</div>
-                    <div class="umcpk-subtitle">Учебный межрегиональный центр подготовки кадров</div>
-                </div>
 
                 <div class="certificate-title">СЕРТИФИКАТ</div>
                 <div class="subtitle">результатов профориентационного тестирования</div>
@@ -182,23 +182,18 @@ function createCertificateHtml(data) {
                 ${Array.isArray(data.anchorsResults) && data.anchorsResults.length > 0 ? `
                 <div class="section">
                     <div class="section-title">ЯКОРЯ КАРЬЕРЫ</div>
-                    ${data.anchorsResults.slice(0, 3).map(item => `
+                    ${data.anchorsResults.slice(0, 2).map(item => `
                         <p class="compact"><strong>${item.name}:</strong> ${item.score.toFixed(1)}</p>
                         ${item.description ? `<p class="compact">${item.description.substring(0, 100)}...</p>` : ''}
                     `).join('')}
                 </div>
                 ` : ''}
 
-                <div class="signature">
-                    <img src="signature.png" alt="Подпись" class="signature-image">
-                    <p class="compact">Директор ООО «УМЦПК» Т.В. Плоских</p>
-                </div>
-
             </div>
 
             <!-- Нижний колонтитул (только лого) -->
             <div class="footer">
-                <img src="images/down.png" alt="Контакты УМЦПК">
+                <img src="images/down.jpg" alt="Подвал УМЦПК" style="margin: 0; padding: 0;">
             </div>
 
         </body>
