@@ -56,23 +56,24 @@
         </section>
 
         <section class="user-info-form" id="userInfoForm" style="display: none;">
-            <button class="back-btn" id="backBtn">← Назад</button>
-            
-            <div class="form-container">
-                <h2>Информация о тестируемом</h2>
-                <p class="form-description">Пожалуйста, заполните данные для создания сертификата</p>
-                
-                <form id="testForm">
-                    <div class="form-group">
-                        <label for="fullName">Фамилия, Имя, Отчество *</label>
-                        <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
-                        <span class="error-message" id="fullNameError"></span>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="school">Номер школы *</label>
-                        <input type="text" id="school" name="school" required placeholder="№ 123" list="schoolsList">
-                        <datalist id="schoolsList">
+    <div class="form-container">
+        <h1>Фамилия Имя Отчество</h1>
+        <p class="form-description">Введите ваше полное имя</p>
+        <p class="form-hint">Укажите полное имя как в документах для корректного оформления сертификата</p>
+        
+        <div class="form-group">
+            <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
+            <span class="error-message" id="fullNameError"></span>
+        </div>
+        
+        <h2>Номер образовательного учреждения</h2>
+        <p class="form-description">Например: Школа №15, Лицей №7, Гимназия №3</p>
+        <p class="form-hint">Укажите полное наименование или номер вашего образовательного учреждения</p>
+        
+        <div class="form-group">
+            <input type="text" id="school" name="school" required placeholder="Школа №123" list="schoolsList">
+            <datalist id="schoolsList">
+                <datalist id="schoolsList">
                             <option value="МАОУ СОШ № 133">
                             <option value="МАОУ СОШ № 141">
                             <option value="Екатеринбургский кадетский корпус">
@@ -118,13 +119,22 @@
                             <option value="МБОУ СОШ № 57">
                             <option value="МАОУ СОШ № 87">
                         </datalist>
-                        <span class="error-message" id="schoolError"></span>
-                    </div>
-                    
-                    <button type="button" class="submit-btn" id="submitFormBtn">Продолжить к тестированию</button>
-                </form>
-            </div>
-        </section>
+            </datalist>
+            <span class="error-message" id="schoolError"></span>
+        </div>
+        
+        <div class="info-block">
+            <h3>О персональном сертификате</h3>
+            <p>По завершении тестирования вы получите официальный сертификат УМЦПК с результатами профориентационного тестирования, включающий анализ ваших профессиональных предпочтений и карьерных ориентаций.</p>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="back-btn" id="backBtn">Назад</button>
+            <button type="button" class="submit-btn" id="submitFormBtn">Начать тестирование</button>
+            <p class="time-estimate">Тестирование займет примерно 20-30 минут. Рекомендуем проходить в спокойной обстановке для получения наиболее точных результатов.</p>
+        </div>
+    </div>
+</section>
 
         <section class="quiz-container" id="quizContainer" style="display: none;">
             <div class="quiz-header">
