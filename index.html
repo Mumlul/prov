@@ -64,85 +64,83 @@
         </section>
 
         <section class="user-info-form" id="userInfoForm" style="display: none;">
-    <div class="form-container">
-        <h1>Фамилия Имя Отчество</h1>
-        <p class="form-description">Введите ваше полное имя</p>
-        <p class="form-hint">Укажите полное имя как в документах для корректного оформления сертификата</p>
-        
-        <div class="form-group">
-            <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
-            <span class="error-message" id="fullNameError"></span>
-        </div>
-        
-        <h2>Номер образовательного учреждения</h2>
-        <p class="form-description">Например: Школа №15, Лицей №7, Гимназия №3</p>
-        <p class="form-hint">Укажите полное наименование или номер вашего образовательного учреждения</p>
-        
-        <div class="form-group">
-            <input type="text" id="school" name="school" required placeholder="Школа №123" list="schoolsList">
-            <datalist id="schoolsList">
-                <datalist id="schoolsList">
-                            <option value="МАОУ СОШ № 133">
-                            <option value="МАОУ СОШ № 141">
-                            <option value="Екатеринбургский кадетский корпус">
-                            <option value="МАОУ гимназия № 35">
-                            <option value="МАОУ Гимназия № 47">
-                            <option value="МБОУ Гимназия № 161">
-                            <option value="МАОУ Гимназия № 120">
-                            <option value="МАОУ СОШ № 76 с УИОП">
-                            <option value="МАОУ СОШ № 7">
-                            <option value="МАОУ СОШ № 113">
-                            <option value="МАОУ Гимназия № 99">
-                            <option value="МАОУ СОШ № 138">
-                            <option value="МАОУ Гимназия № 205 &quot;Театр&quot;">
-                            <option value="МАОУ СОШ № 167">
-                            <option value="МАОУ СОШ № 68 с УИОП">
-                            <option value="МАОУ лицей № 180 Полифорум">
-                            <option value="МАОУ СОШ № 52">
-                            <option value="МАОУ СОШ № 123">
-                            <option value="МАОУ Лицей № 173">
-                            <option value="МАОУ Гимназия № 5">
-                            <option value="МАОУ СОШ № 19">
-                            <option value="МАОУ СОШ №46">
-                            <option value="БМАОУ СОШ № 9">
-                            <option value="ГАНОУ СО &quot;Губернаторский лицей&quot;">
-                            <option value="МАОУ Гимназия № 202 &quot;Менталитет&quot;">
-                            <option value="МАОУ Лицей № 110">
-                            <option value="МАОУ Лицей № 88">
-                            <option value="МАОУ СОШ 147">
-                            <option value="МАОУ СОШ № 50">
-                            <option value="МАОУ СОШ № 106">
-                            <option value="МАОУ СОШ № 11">
-                            <option value="МАОУ СОШ № 125">
-                            <option value="МАОУ СОШ № 163">
-                            <option value="МАОУ СОШ № 170">
-                            <option value="МАОУ СОШ № 178">
-                            <option value="МАОУ СОШ № 18">
-                            <option value="МАОУ СОШ № 105">
-                            <option value="МАОУ СОШ № 200">
-                            <option value="МАОУ СОШ № 23">
-                            <option value="МАОУ СОШ № 4">
-                            <option value="МАОУ СОШ № 43">
-                            <option value="МАОУ СОШ № 83">
-                            <option value="МБОУ СОШ № 57">
-                            <option value="МАОУ СОШ № 87">
-                        </datalist>
-            </datalist>
-            <span class="error-message" id="schoolError"></span>
-        </div>
-        
-        <div class="info-block">
-            <h3>О персональном сертификате</h3>
-            <p>По завершении тестирования вы получите официальный сертификат УМЦПК с результатами профориентационного тестирования, включающий анализ ваших профессиональных предпочтений и карьерных ориентаций.</p>
-        </div>
-        
-        <div class="form-actions">
-            <button type="button" class="back-btn" id="backBtn">Назад</button>
-            <button type="button" class="submit-btn" id="submitFormBtn">Начать тестирование</button>
-            <p class="time-estimate">Тестирование займет примерно 20-30 минут. Рекомендуем проходить в спокойной обстановке для получения наиболее точных результатов.</p>
-        </div>
-    </div>
-</section>
+            <div class="form-container">
+                <h1>Фамилия Имя Отчество</h1>
+                <p class="form-description">Введите ваше полное имя</p>
+                <p class="form-hint">Укажите полное имя как в документах для корректного оформления сертификата</p>
+                
+                <div class="form-group">
+                    <input type="text" id="fullName" name="fullName" required placeholder="Иванов Иван Иванович">
+                    <span class="error-message" id="fullNameError"></span>
+                </div>
+                
+                <h2>Номер образовательного учреждения</h2>
+                <p class="form-description">Например: Школа №15, Лицей №7, Гимназия №3</p>
+                <p class="form-hint">Укажите полное наименование или номер вашего образовательного учреждения</p>
+                
+                <div class="form-group">
+                    <input type="text" id="school" name="school" required placeholder="Школа №123" list="schoolsList">
+                    <datalist id="schoolsList">
+                        <option value="МАОУ СОШ № 133">
+                        <option value="МАОУ СОШ № 141">
+                        <option value="Екатеринбургский кадетский корпус">
+                        <option value="МАОУ гимназия № 35">
+                        <option value="МАОУ Гимназия № 47">
+                        <option value="МБОУ Гимназия № 161">
+                        <option value="МАОУ Гимназия № 120">
+                        <option value="МАОУ СОШ № 76 с УИОП">
+                        <option value="МАОУ СОШ № 7">
+                        <option value="МАОУ СОШ № 113">
+                        <option value="МАОУ Гимназия № 99">
+                        <option value="МАОУ СОШ № 138">
+                        <option value="МАОУ Гимназия № 205 &quot;Театр&quot;">
+                        <option value="МАОУ СОШ № 167">
+                        <option value="МАОУ СОШ № 68 с УИОП">
+                        <option value="МАОУ лицей № 180 Полифорум">
+                        <option value="МАОУ СОШ № 52">
+                        <option value="МАОУ СОШ № 123">
+                        <option value="МАОУ Лицей № 173">
+                        <option value="МАОУ Гимназия № 5">
+                        <option value="МАОУ СОШ № 19">
+                        <option value="МАОУ СОШ №46">
+                        <option value="БМАОУ СОШ № 9">
+                        <option value="ГАНОУ СО &quot;Губернаторский лицей&quot;">
+                        <option value="МАОУ Гимназия № 202 &quot;Менталитет&quot;">
+                        <option value="МАОУ Лицей № 110">
+                        <option value="МАОУ Лицей № 88">
+                        <option value="МАОУ СОШ 147">
+                        <option value="МАОУ СОШ № 50">
+                        <option value="МАОУ СОШ № 106">
+                        <option value="МАОУ СОШ № 11">
+                        <option value="МАОУ СОШ № 125">
+                        <option value="МАОУ СОШ № 163">
+                        <option value="МАОУ СОШ № 170">
+                        <option value="МАОУ СОШ № 178">
+                        <option value="МАОУ СОШ № 18">
+                        <option value="МАОУ СОШ № 105">
+                        <option value="МАОУ СОШ № 200">
+                        <option value="МАОУ СОШ № 23">
+                        <option value="МАОУ СОШ № 4">
+                        <option value="МАОУ СОШ № 43">
+                        <option value="МАОУ СОШ № 83">
+                        <option value="МБОУ СОШ № 57">
+                        <option value="МАОУ СОШ № 87">
+                    </datalist>
+                    <span class="error-message" id="schoolError"></span>
+                </div>
+                
+                <div class="info-block">
+                    <h3>О персональном сертификате</h3>
+                    <p>По завершении тестирования вы получите официальный сертификат УМЦПК с результатами профориентационного тестирования, включающий анализ ваших профессиональных предпочтений и карьерных ориентаций.</p>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="back-btn" id="backBtn">Назад</button>
+                    <button type="button" class="submit-btn" id="submitFormBtn">Начать тестирование</button>
+                    <p class="time-estimate">Тестирование займет примерно 20-30 минут. Рекомендуем проходить в спокойной обстановке для получения наиболее точных результатов.</p>
+                </div>
+            </div>
+        </section>
 
         <section class="quiz-container" id="quizContainer" style="display: none;">
             <div class="quiz-header">
