@@ -14,16 +14,19 @@ body {
 
 /* Шапка */
 .header {
-    background: linear-gradient(135deg, #237DF5 0%, #2337A5 100%);
-    color: white;
-    padding: 15px 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    padding: 20px 0;
     position: relative;
+    z-index: 100;
 }
 
 .header-nav {
     display: flex;
-    gap: 25px;
+    gap: 30px;
+    background: rgba(35, 55, 165, 0.9);
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link {
@@ -36,49 +39,32 @@ body {
     transition: all 0.3s ease;
 }
 
-.nav-link::after {
-    content: attr(data-text);
+.nav-link::before {
+    content: '';
     position: absolute;
+    bottom: 0;
     left: 0;
-    top: 0;
-    color: rgba(255,255,255,0.8);
     width: 0;
-    overflow: hidden;
-    white-space: nowrap;
+    height: 2px;
+    background: white;
     transition: width 0.3s ease;
 }
 
-.nav-link:hover::after {
+.nav-link:hover::before {
     width: 100%;
 }
 
-.header:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: 0.5s;
-}
-
-.header:hover::before {
-    left: 100%;
+.nav-link:hover {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .header-container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .logo-main {
@@ -385,6 +371,8 @@ main {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     margin: 0 auto;
+    margin-top: 80px; /* Отступ сверху */
+    min-height: calc(100vh - 200px); /* Чтобы контент был по центру */
     padding: 30px;
 }
 
@@ -443,12 +431,12 @@ main {
 }
 
 .question-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
+    padding: 40px;
     margin: 20px auto;
-    max-width: 800px;
+    max-width: 700px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .question-content {
@@ -894,4 +882,60 @@ input:invalid {
 
 .feature:hover::before {
     left: 100%;
+}
+
+.quiz-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding: 0 20px;
+}
+
+.nav-btn {
+    background: linear-gradient(135deg, #237DF5 0%, #2337A5 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.nav-btn:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
 }
