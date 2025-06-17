@@ -195,6 +195,7 @@ main {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     margin: 0 auto;
+    display: none;
 }
 
 .form-container h1 {
@@ -217,17 +218,52 @@ main {
     outline: none;
 }
 
-/* Тест */
-.quiz-container, .career-anchors-quiz, .result-container {
+/* Секция теста */
+.quiz-container {
     background-color: white;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     max-width: 800px;
-    margin: 0 auto;
+    margin: 30px auto;
     padding: 30px;
+    display: none;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #237DF5;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.back-btn:hover {
+    color: #1a6bd8;
+    background-color: rgba(35, 125, 245, 0.1);
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 70%;
 }
 
 .progress-bar {
+    flex-grow: 1;
     height: 10px;
     background-color: #f0f0f0;
     border-radius: 5px;
@@ -239,6 +275,29 @@ main {
     width: 0%;
     background: linear-gradient(90deg, #237DF5, #2337A5);
     transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+}
+
+.question-container {
+    padding: 40px;
+    margin: 20px auto;
+    max-width: 700px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.question-container h3 {
+    color: #2337A5;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 20px;
+    padding: 0 10px;
 }
 
 .question-content {
@@ -268,29 +327,25 @@ main {
 .profession-card.selected {
     border-color: #237DF5;
     background-color: #f5f9ff;
+    box-shadow: 0 5px 15px rgba(35, 125, 245, 0.15);
 }
 
-.rating-option {
-    width: 40px;
-    height: 40px;
-    border: 2px solid #ddd;
-    border-radius: 50%;
+.profession-card h4 {
+    color: #2337A5;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.profession-card .short {
+    color: #666;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.quiz-navigation {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.rating-option:hover {
-    background-color: #f0f7ff;
-    border-color: #237DF5;
-}
-
-.rating-option.selected {
-    background: linear-gradient(135deg, #237DF5 0%, #2337A5 100%);
-    color: white;
-    border-color: #237DF5;
+    justify-content: space-between;
+    margin-top: 30px;
 }
 
 .nav-btn {
@@ -303,20 +358,19 @@ main {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Результаты */
-.test-result-block {
-    background-color: #f9f9f9;
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    border-left: 5px solid #237DF5;
+.nav-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Индикатор загрузки */
@@ -361,7 +415,7 @@ main {
     margin-top: 15px;
 }
 
-.progress-container {
+.loading-progress-container {
     width: 80%;
     max-width: 300px;
     height: 10px;
@@ -371,7 +425,7 @@ main {
     overflow: hidden;
 }
 
-.progress-bar {
+.loading-progress-bar {
     height: 100%;
     width: 0%;
     background: #237DF5;
@@ -392,10 +446,26 @@ main {
     
     .profession-card {
         width: 100%;
+        min-width: auto;
     }
     
-    .quiz-container, .career-anchors-quiz, .user-info-form {
+    .quiz-container, .user-info-form {
         padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .question-container {
+        padding: 20px 10px;
+    }
+    
+    .question-container h3 {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .nav-btn {
+        padding: 10px 20px;
+        font-size: 15px;
     }
 }
 
