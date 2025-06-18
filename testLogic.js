@@ -157,8 +157,8 @@ async function finishTest() {
             personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
             time: timeSpent,
             scores: scores,
-            hollandPrimary: dominantCode, // Код основного типа
-            hollandSecondary: secondaryCode, // Код второго типа
+            hollandPrimary: dominantCode,
+            hollandSecondary: secondaryCode,
             I: scores.I || 0,
             II: scores.II || 0,
             III: scores.III || 0,
