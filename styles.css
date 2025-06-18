@@ -934,8 +934,9 @@ main {
     opacity: 1;
 }
 .anchors-chart-container {
-    margin: 30px 0;
-    position: relative;
+    max-width: 500px;
+    margin: 0 auto 20px;
+    text-align: center;
 }
 
 /* Десктопная версия - горизонтальные бары */
@@ -960,19 +961,18 @@ main {
 }
 
 .anchor-legend-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
-    border-radius: 20px;
-    background-color: #f5f9ff;
+    margin: 5px 10px;
     font-size: 14px;
 }
 
 .anchor-color-box {
-    width: 14px;
-    height: 14px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
     border-radius: 3px;
-    margin-right: 8px;
 }
 
 /* Мобильная адаптация */

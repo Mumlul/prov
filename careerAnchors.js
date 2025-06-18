@@ -238,104 +238,93 @@ function renderAnchorsChart(results) {
         '#8BC34A', '#E91E63'
     ];
     
-    // Создаем контейнер для графиков
+    // Создаем контейнер для графика
     const chartContainer = document.createElement('div');
     chartContainer.className = 'anchors-chart-container';
+    chartContainer.style.position = 'relative';
+    chartContainer.style.width = '100%';
+    chartContainer.style.maxWidth = '500px';
+    chartContainer.style.margin = '0 auto';
     
-    // Десктопная версия (горизонтальные бары)
-    const barCanvas = document.createElement('canvas');
-    barCanvas.className = 'anchors-bar-chart';
-    chartContainer.appendChild(barCanvas);
-    
-    // Мобильная версия (компактные вертикальные бары)
-    const compactChart = document.createElement('div');
-    compactChart.className = 'anchors-compact-chart';
-    results.forEach((result, i) => {
-        const item = document.createElement('div');
-        item.className = 'compact-chart-item';
-        
-        const label = document.createElement('div');
-        label.className = 'compact-chart-label';
-        label.innerHTML = `
-            <span>${result.name}</span>
-            <span>${result.score.toFixed(1)}/10</span>
-        `;
-        
-        const bar = document.createElement('div');
-        bar.className = 'compact-chart-bar';
-        
-        const progress = document.createElement('div');
-        progress.className = 'compact-chart-progress';
-        progress.style.width = `${result.score * 10}%`;
-        progress.style.background = colors[i];
-        
-        const value = document.createElement('div');
-        value.className = 'compact-chart-value';
-        value.textContent = result.score.toFixed(1);
-        
-        bar.appendChild(progress);
-        bar.appendChild(value);
-        item.appendChild(label);
-        item.appendChild(bar);
-        compactChart.appendChild(item);
-    });
-    chartContainer.appendChild(compactChart);
+    // Canvas для круговой диаграммы
+    const pieCanvas = document.createElement('canvas');
+    pieCanvas.className = 'anchors-pie-chart';
+    pieCanvas.style.display = 'block';
+    pieCanvas.style.width = '100%';
+    pieCanvas.style.height = 'auto';
+    chartContainer.appendChild(pieCanvas);
     
     // Легенда
     const legend = document.createElement('div');
     legend.className = 'anchors-legend';
+    legend.style.marginTop = '20px';
+    legend.style.display = 'flex';
+    legend.style.flexWrap = 'wrap';
+    legend.style.justifyContent = 'center';
+    
     results.forEach((result, i) => {
         const item = document.createElement('div');
         item.className = 'anchor-legend-item';
-        item.innerHTML = `
-            <span class="anchor-color-box" style="background: ${colors[i]}"></span>
-            <span>${result.name}</span>
-        `;
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.margin = '5px 10px';
+        
+        const colorBox = document.createElement('span');
+        colorBox.className = 'anchor-color-box';
+        colorBox.style.display = 'inline-block';
+        colorBox.style.width = '15px';
+        colorBox.style.height = '15px';
+        colorBox.style.backgroundColor = colors[i];
+        colorBox.style.marginRight = '5px';
+        colorBox.style.borderRadius = '3px';
+        
+        const label = document.createElement('span');
+        label.textContent = `${result.name} (${result.score.toFixed(1)})`;
+        
+        item.appendChild(colorBox);
+        item.appendChild(label);
         legend.appendChild(item);
     });
-    chartContainer.appendChild(legend);
     
+    chartContainer.appendChild(legend);
     container.appendChild(chartContainer);
     
-    // Инициализация десктопного графика
-    new Chart(barCanvas, {
-        type: 'bar',
+    // Инициализация круговой диаграммы
+    new Chart(pieCanvas, {
+        type: 'pie',
         data: {
             labels: results.map(item => item.name),
             datasets: [{
-                label: 'Баллы',
                 data: results.map(item => item.score),
                 backgroundColor: colors,
-                borderWidth: 0
+                borderWidth: 1,
+                borderColor: '#fff'
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 10,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    display: false
+                    display: false // Легенду выводим отдельно
                 },
                 tooltip: {
                     callbacks: {
                         label: (context) => {
-                            return `${context.parsed.x.toFixed(1)}/10`;
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            return `${label}: ${value.toFixed(1)}/10`;
                         },
                         afterLabel: (context) => {
                             return results[context.dataIndex].description;
                         }
                     }
                 }
+            },
+            cutout: '60%', // Можно сделать кольцевую диаграмму
+            animation: {
+                animateScale: true,
+                animateRotate: true
             }
         }
     });
