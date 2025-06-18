@@ -139,12 +139,15 @@ async function finishTest() {
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
             type: getDescriptionByType(type).name,
+            code: type, // Добавляем код типа (I, II, III и т.д.)
             score
         }))
         .sort((a, b) => b.score - a.score);
 
     const dominantType = sortedScores[0].type;
+    const dominantCode = sortedScores[0].code; // Код основного типа
     const secondaryType = sortedScores[1]?.type || "";
+    const secondaryCode = sortedScores[1]?.code || ""; // Код второго типа
 
     try {
         await saveResults({
@@ -153,12 +156,21 @@ async function finishTest() {
             testType: 'holland',
             personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
             time: timeSpent,
-            scores: scores
+            scores: scores,
+            hollandPrimary: dominantCode, // Код основного типа
+            hollandSecondary: secondaryCode, // Код второго типа
+            I: scores.I || 0,
+            II: scores.II || 0,
+            III: scores.III || 0,
+            IV: scores.IV || 0,
+            V: scores.V || 0,
+            VI: scores.VI || 0
         });
     } catch (error) {
         console.error("Ошибка при сохранении результатов:", error);
     }
 
+    // Остальной код без изменений
     resultPersonality.textContent = `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`;
     hollandDescription.innerHTML = personalityInfo.fullDescription;
     hollandProfessions.innerHTML = personalityInfo.recommendedProfessions
