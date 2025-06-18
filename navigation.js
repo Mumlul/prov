@@ -238,122 +238,145 @@ if (!window.renderAnchorsChart) {
     window.renderAnchorsChart = function(results) {
         if (!anchorsChart) return;
         
-        // Ваш существующий код рендеринга диаграммы из careerAnchors.js
         anchorsChart.innerHTML = '';
         try {
-        const container = document.getElementById('anchors-chart');
-        if (!container) {
-            console.error('Контейнер для диаграммы не найден');
-            return;
-        }
-
-        if (!results || results.length === 0) {
-            console.error('Нет данных для диаграммы');
-            container.innerHTML = '<p>Нет данных для отображения</p>';
-            return;
-        }
-
-        container.innerHTML = '';
-        
-        // Цвета для якорей
-        const colors = [
-            '#237DF5', '#4CAF50', '#FFC107',
-            '#9C27B0', '#FF5722', '#607D8B',
-            '#8BC34A', '#E91E63'
-        ];
-
-        // Основной контейнер
-        const chartContainer = document.createElement('div');
-        chartContainer.style.width = '100%';
-        chartContainer.style.maxWidth = '300px';
-        chartContainer.style.margin = '0 auto';
-
-        // Canvas для диаграммы
-        const canvas = document.createElement('canvas');
-        canvas.style.display = 'block';
-        canvas.width = 250;
-        canvas.height = 250;
-        canvas.style.width = '250px';
-        canvas.style.height = '250px';
-        chartContainer.appendChild(canvas);
-
-        // Компактная легенда
-        const compactLegend = document.createElement('div');
-        compactLegend.style.marginTop = '10px';
-        compactLegend.style.fontSize = '12px';
-        
-        results.slice(0, 3).forEach((result, i) => {
-            const item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.alignItems = 'center';
-            item.style.margin = '3px 0';
-            
-            const colorBox = document.createElement('span');
-            colorBox.style.display = 'inline-block';
-            colorBox.style.width = '12px';
-            colorBox.style.height = '12px';
-            colorBox.style.backgroundColor = colors[i];
-            colorBox.style.marginRight = '5px';
-            colorBox.style.borderRadius = '2px';
-            
-            const label = document.createElement('span');
-            label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
-            
-            item.appendChild(colorBox);
-            item.appendChild(label);
-            compactLegend.appendChild(item);
-        });
-
-        chartContainer.appendChild(compactLegend);
-        container.appendChild(chartContainer);
-
-        // Проверка наличия Chart.js
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js не загружен');
-            container.innerHTML = '<p>Ошибка загрузки библиотеки графиков</p>';
-            return;
-        }
-
-        // Создаем диаграмму
-        new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-                labels: results.map(item => item.name),
-                datasets: [{
-                    data: results.map(item => item.score),
-                    backgroundColor: colors,
-                    borderWidth: 1,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: false,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => 
-                                `${context.label}: ${context.raw.toFixed(1)}`
-                        }
-                    }
-                },
-                cutout: '65%',
-                rotation: -90,
-                circumference: 360,
-                animation: {
-                    animateScale: false,
-                    animateRotate: true
-                }
+            const container = document.getElementById('anchors-chart');
+            if (!container) {
+                console.error('Контейнер для диаграммы не найден');
+                return;
             }
-        });
 
-    } catch (error) {
-        console.error('Ошибка при создании диаграммы:', error);
-        const container = document.getElementById('anchors-chart');
-        if (container) {
-            container.innerHTML = '<p>Ошибка при отображении диаграммы</p>';
+            if (!results || results.length === 0) {
+                console.error('Нет данных для диаграммы');
+                container.innerHTML = '<p>Нет данных для отображения</p>';
+                return;
+            }
+
+            // Цвета для якорей
+            const colors = [
+                '#237DF5', '#4CAF50', '#FFC107',
+                '#9C27B0', '#FF5722', '#607D8B',
+                '#8BC34A', '#E91E63'
+            ];
+
+            // Основной контейнер с flex-расположением
+            const mainContainer = document.createElement('div');
+            mainContainer.style.display = 'flex';
+            mainContainer.style.flexWrap = 'wrap';
+            mainContainer.style.justifyContent = 'center';
+            mainContainer.style.alignItems = 'center';
+            mainContainer.style.gap = '20px';
+            mainContainer.style.width = '100%';
+            mainContainer.style.maxWidth = '600px';
+            mainContainer.style.margin = '0 auto';
+
+            // Контейнер для диаграммы
+            const chartContainer = document.createElement('div');
+            chartContainer.style.flex = '1';
+            chartContainer.style.minWidth = '250px';
+
+            // Canvas для диаграммы
+            const canvas = document.createElement('canvas');
+            canvas.style.display = 'block';
+            canvas.width = 250;
+            canvas.height = 250;
+            canvas.style.width = '250px';
+            canvas.style.height = '250px';
+            chartContainer.appendChild(canvas);
+
+            // Контейнер для легенды (сбоку)
+            const legendContainer = document.createElement('div');
+            legendContainer.style.flex = '1';
+            legendContainer.style.minWidth = '200px';
+            legendContainer.style.padding = '10px';
+            
+            // Заголовок легенды
+            const legendTitle = document.createElement('div');
+            legendTitle.textContent = 'Карьерные ориентации';
+            legendTitle.style.fontWeight = 'bold';
+            legendTitle.style.marginBottom = '10px';
+            legendTitle.style.color = '#2337A5';
+            legendContainer.appendChild(legendTitle);
+
+            // Элементы легенды
+            results.forEach((result, i) => {
+                const legendItem = document.createElement('div');
+                legendItem.style.display = 'flex';
+                legendItem.style.alignItems = 'center';
+                legendItem.style.margin = '8px 0';
+                
+                const colorBox = document.createElement('div');
+                colorBox.style.width = '15px';
+                colorBox.style.height = '15px';
+                colorBox.style.backgroundColor = colors[i % colors.length];
+                colorBox.style.borderRadius = '3px';
+                colorBox.style.marginRight = '10px';
+                colorBox.style.flexShrink = '0';
+                
+                const label = document.createElement('div');
+                label.style.flex = '1';
+                label.innerHTML = `
+                    <div style="font-weight: 600;">${result.name}</div>
+                    <div style="font-size: 0.9em; color: #555;">Оценка: ${result.score.toFixed(1)}</div>
+                `;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                legendContainer.appendChild(legendItem);
+            });
+
+            // Собираем все вместе
+            mainContainer.appendChild(chartContainer);
+            mainContainer.appendChild(legendContainer);
+            container.appendChild(mainContainer);
+
+            // Проверка наличия Chart.js
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js не загружен');
+                container.innerHTML = '<p>Ошибка загрузки библиотеки графиков</p>';
+                return;
+            }
+
+            // Создаем диаграмму
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: results.map(item => item.name),
+                    datasets: [{
+                        data: results.map(item => item.score),
+                        backgroundColor: colors,
+                        borderWidth: 1,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => 
+                                    `${context.label}: ${context.raw.toFixed(1)}`
+                            }
+                        }
+                    },
+                    cutout: '65%',
+                    rotation: -90,
+                    circumference: 360,
+                    animation: {
+                        animateScale: false,
+                        animateRotate: true
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Ошибка при создании диаграммы:', error);
+            const container = document.getElementById('anchors-chart');
+            if (container) {
+                container.innerHTML = '<p>Ошибка при отображении диаграммы</p>';
+            }
         }
-    }
     };
 }
