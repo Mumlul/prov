@@ -228,42 +228,127 @@ function calculateAnchorsResults() {
 }
 
 function renderChart(results) {
-    const labels = results.map(item => item.name);
-    const data = results.map(item => item.score);
-    
     const ctx = document.createElement('canvas');
     anchorsChart.innerHTML = '';
     anchorsChart.appendChild(ctx);
     
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Баллы',
-                data: data,
-                backgroundColor: '#237DF5',
-                borderColor: '#1a6bd8',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 10
-                }
+    // Определяем тип графика в зависимости от ширины экрана
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Круговая диаграмма для мобильных
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: results.map(r => r.name),
+                datasets: [{
+                    data: results.map(r => r.score),
+                    backgroundColor: [
+                        '#237DF5', '#4CAF50', '#FFC107', 
+                        '#9C27B0', '#FF5722', '#607D8B',
+                        '#8BC34A', '#E91E63'
+                    ],
+                    borderWidth: 1
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}`;
+                            }
+                        }
+                    }
+                },
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        alert(`${results[index].name}: ${results[index].score.toFixed(1)}\n${results[index].description}`);
+                    }
                 }
             }
-        }
+        });
+    } else {
+        // Горизонтальная диаграмма для десктопов
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: results.map(item => item.name),
+                datasets: [{
+                    label: 'Баллы',
+                    data: results.map(item => item.score),
+                    backgroundColor: '#237DF5',
+                    borderColor: '#1a6bd8',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const index = context[0].dataIndex;
+                                return results[index].description;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Создаем легенду
+    const legendContainer = document.createElement('div');
+    legendContainer.className = 'chart-legend';
+    
+    results.forEach((result, i) => {
+        const colors = [
+            '#237DF5', '#4CAF50', '#FFC107', 
+            '#9C27B0', '#FF5722', '#607D8B',
+            '#8BC34A', '#E91E63'
+        ];
+        
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `
+            <span class="legend-color" style="background-color: ${colors[i]}"></span>
+            <span>${result.name}</span>
+        `;
+        
+        legendItem.addEventListener('click', () => {
+            alert(`${result.name}: ${result.score.toFixed(1)}\n${result.description}`);
+        });
+        
+        legendContainer.appendChild(legendItem);
     });
+    
+    anchorsChart.appendChild(legendContainer);
 }
+
+// Обработчик изменения размера окна
+window.addEventListener('resize', function() {
+    if (window.anchorsChart && window.anchorsResults) {
+        renderChart(window.anchorsResults);
+    }
+});
 
 function getAnchorName(key) {
     const names = {

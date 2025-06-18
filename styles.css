@@ -840,3 +840,95 @@ main {
         font-size: 15px;
     }
 }
+
+.chart-container {
+    margin: 30px 0;
+    height: 300px;
+    position: relative;
+}
+
+/* Стили для десктопной версии (горизонтальная диаграмма) */
+.chart-container .bar-chart {
+    height: 100%;
+    display: block;
+}
+
+/* Стили для мобильной версии (круговая диаграмма) */
+.chart-container .pie-chart {
+    display: none;
+    height: 100%;
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    background-color: #e0e0e0;
+}
+
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-container .bar-chart {
+        display: none;
+    }
+    
+    .chart-container .pie-chart {
+        display: block;
+    }
+    
+    .chart-legend {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .legend-item {
+        width: 100%;
+        max-width: 200px;
+        justify-content: center;
+    }
+}
+
+/* Анимация и tooltip */
+.chart-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 100;
+    font-size: 14px;
+    transform: translate(-50%, -120%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.pie-chart:hover .chart-tooltip {
+    opacity: 1;
+}
