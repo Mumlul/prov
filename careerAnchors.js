@@ -180,16 +180,12 @@ function setupPdfButton() {
     if (!pdfButton) return;
     
     pdfButton.style.display = 'inline-block';
-    pdfButton.onclick = async () => {
+    pdfButton.onclick = async (e) => {
+        e.preventDefault(); // Предотвращаем стандартное поведение
+        
         try {
             const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : null;
             const anchorsData = prepareAnchorsCertificateData();
-            
-            console.log('Данные для PDF:', { hollandData, anchorsData });
-            
-            if (!anchorsData?.results || anchorsData.results.length === 0) {
-                throw new Error('Нет данных теста Якорей карьеры');
-            }
             
             await generateCertificate(
                 hollandData || { 
@@ -203,6 +199,8 @@ function setupPdfButton() {
             console.error('Ошибка генерации PDF:', error);
             alert('Ошибка при создании PDF: ' + error.message);
         }
+        
+        return false;
     };
 }
 
