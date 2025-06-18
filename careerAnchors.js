@@ -35,6 +35,7 @@ const anchorsDescription = document.getElementById('anchors-description');
 const anchorsTimeSpent = document.getElementById('anchors-time-spent');
 const anchorsChart = document.getElementById('anchors-chart');
 
+
 // Инициализация теста
 function startCareerAnchorsTest() {
     currentQuestion = 0;
@@ -125,6 +126,7 @@ async function finishCareerTest() {
     
     // Сохраняем результаты в глобальную переменную для доступа из других функций
     window.anchorsResults = results;
+    window.anchorsTimeSpent = timeSpent;
     
     // Получаем данные из теста Голланда
     const hollandData = window.hollandResults || {
@@ -172,23 +174,31 @@ async function finishCareerTest() {
     }
     
     // Обновляем DOM элементы с результатами теста якорей карьеры
-    if (results.length > 0) {
+   if (results.length > 0) {
         // Показываем 2 ведущие ориентации
-        anchorsResult.textContent = results.slice(0, 2).map(r => r.name).join(', ');
+        if (anchorsResult) {
+            anchorsResult.textContent = results.slice(0, 2).map(r => r.name).join(', ');
+        }
         
         // Добавляем описания для ведущих ориентаций
-        anchorsDescription.innerHTML = results.slice(0, 2).map(r => `
-            <div class="anchor-result">
-                <h4>${r.name} (${r.score.toFixed(1)})</h4>
-                <p>${r.description}</p>
-            </div>
-        `).join('');
+        if (anchorsDescription) {
+            anchorsDescription.innerHTML = results.slice(0, 2).map(r => `
+                <div class="anchor-result">
+                    <h4>${r.name} (${r.score.toFixed(1)})</h4>
+                    <p>${r.description}</p>
+                </div>
+            `).join('');
+        }
         
         // Обновляем время прохождения
-        anchorsTimeSpent.textContent = timeSpent;
+        if (anchorsTimeSpent) {
+            anchorsTimeSpent.textContent = timeSpent;
+        }
         
-        // Рендерим диаграмму
-        renderAnchorsChart(results);
+        // Рендерим диаграмму только если есть контейнер
+        if (anchorsChart && window.renderAnchorsChart) {
+            window.renderAnchorsChart(results);
+        }
     }
     
     // Показываем результаты (переходим на страницу результатов)

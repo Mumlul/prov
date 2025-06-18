@@ -12,6 +12,14 @@ const backToFormBtn = document.getElementById('backToFormBtn');
 const backToFirstTestBtn = document.getElementById('backToFirstTestBtn');
 const submitFormBtn = document.getElementById('submitFormBtn');
 const restartBtn = document.getElementById('restart-btn');
+const resultPersonality = document.getElementById('result-personality');
+const hollandTimeSpent = document.getElementById('holland-time-spent');
+const hollandDescription = document.getElementById('holland-description');
+const hollandProfessions = document.getElementById('holland-professions');
+const anchorsResult = document.getElementById('career-anchors-result');
+const anchorsDescription = document.getElementById('anchors-description');
+const anchorsTimeSpent = document.getElementById('anchors-time-spent');
+const anchorsChart = document.getElementById('anchors-chart');
 
 // Экспортируемые переменные
 export let userName = "";
@@ -110,9 +118,9 @@ restartBtn.addEventListener('click', () => {
 // Показ результатов (без изменений)
 export async function showResults() {
     // Скрываем тесты и показываем страницу результатов
-    quizContainer.style.display = 'none';
-    careerAnchorsQuiz.style.display = 'none';
-    resultContainer.style.display = 'block';
+    if (quizContainer) quizContainer.style.display = 'none';
+    if (careerAnchorsQuiz) careerAnchorsQuiz.style.display = 'none';
+    if (resultContainer) resultContainer.style.display = 'block';
     
     try {
         // 1. Получаем данные обоих тестов
@@ -120,7 +128,7 @@ export async function showResults() {
         const anchorsData = window.prepareAnchorsCertificateData?.();
         
         // 2. Отображаем результаты теста Холланда
-        if (window.hollandResults) {
+        if (window.hollandResults && resultPersonality && hollandTimeSpent && hollandDescription && hollandProfessions) {
             const { personality, time } = window.hollandResults;
             resultPersonality.textContent = personality;
             hollandTimeSpent.textContent = time;
@@ -139,7 +147,7 @@ export async function showResults() {
         }
         
         // 3. Отображаем результаты теста "Якоря карьеры"
-        if (window.anchorsResults) {
+        if (window.anchorsResults && anchorsResult && anchorsDescription && anchorsTimeSpent) {
             const topAnchors = window.anchorsResults.slice(0, 2);
             
             // Обновляем текстовые результаты
@@ -158,8 +166,10 @@ export async function showResults() {
                 anchorsTimeSpent.textContent = window.anchorsTimeSpent;
             }
             
-            // Рендерим диаграмму
-            renderAnchorsChart(window.anchorsResults);
+            // Рендерим диаграмму только если есть контейнер
+            if (anchorsChart) {
+                renderAnchorsChart(window.anchorsResults);
+            }
         }
         
         // 4. Настраиваем кнопку PDF (ваш существующий код с улучшениями)
@@ -211,14 +221,27 @@ export async function showResults() {
         console.error('Ошибка при отображении результатов:', error);
         
         // Показываем сообщение об ошибке пользователю
-        const errorElement = document.createElement('div');
-        errorElement.className = 'error-message';
-        errorElement.innerHTML = `
-            <p>Произошла ошибка при отображении результатов.</p>
-            <button onclick="location.reload()">Попробовать снова</button>
-        `;
-        
-        resultContainer.innerHTML = '';
-        resultContainer.appendChild(errorElement);
+        if (resultContainer) {
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.innerHTML = `
+                <p>Произошла ошибка при отображении результатов.</p>
+                <button onclick="location.reload()">Попробовать снова</button>
+            `;
+            
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(errorElement);
+        }
     }
+}
+
+// Добавим функцию renderAnchorsChart, если она не определена
+if (!window.renderAnchorsChart) {
+    window.renderAnchorsChart = function(results) {
+        if (!anchorsChart) return;
+        
+        // Ваш существующий код рендеринга диаграммы из careerAnchors.js
+        anchorsChart.innerHTML = '';
+        // ... остальной код рендеринга диаграммы
+    };
 }
