@@ -139,26 +139,44 @@ async function finishTest() {
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
             type: getDescriptionByType(type).name,
-            score
+            score,
+            key: type
         }))
         .sort((a, b) => b.score - a.score);
 
-    const dominantType = sortedScores[0].type;
-    const secondaryType = sortedScores[1]?.type || "";
+    const dominantType = sortedScores[0];
+    const secondaryType = sortedScores[1] || null;
+    
+    // Получаем описания для обоих типов
+    const dominantInfo = getPersonalityDescription(dominantType.key);
+    const secondaryInfo = secondaryType ? getPersonalityDescription(secondaryType.key) : null;
+
+    // Формируем полное описание
+    let fullDescription = `
+        <h3>Основной тип: ${dominantType.type}</h3>
+        ${dominantInfo.fullDescription}
+    `;
+    
+    if (secondaryInfo) {
+        fullDescription += `
+            <h3>Второстепенный тип: ${secondaryType.type}</h3>
+            ${secondaryInfo.fullDescription}
+        `;
+    }
 
     // Сохраняем данные для последующей отправки
     window.hollandResults = {
         name: userName,
         group: userGroup,
         testType: 'holland',
-        personality: `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`,
+        personality: `${dominantType.type}${secondaryType ? ` + ${secondaryType.type}` : ''}`,
         time: timeSpent,
         scores: scores
     };
 
-    resultPersonality.textContent = `${dominantType}${secondaryType ? ` + ${secondaryType}` : ''}`;
-    hollandDescription.innerHTML = personalityInfo.fullDescription;
-    hollandProfessions.innerHTML = personalityInfo.recommendedProfessions
+    resultPersonality.textContent = `${dominantType.type}${secondaryType ? ` + ${secondaryType.type}` : ''}`;
+    hollandDescription.innerHTML = fullDescription;
+    hollandProfessions.innerHTML = dominantInfo.recommendedProfessions
         .map(prof => `<li>${prof}</li>`)
         .join('');
     hollandTimeSpent.textContent = timeSpent;
