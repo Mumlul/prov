@@ -137,7 +137,7 @@ async function finishCareerTest() {
     anchorsTimeSpent.textContent = timeSpent;
     
     // Создание графика
-    renderChart(results);
+    renderAnchorsChart(results);
     
     // Сохранение результатов
     try {
