@@ -67,7 +67,7 @@ function createCertificateHtml(data) {
                 .header img {
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
+                    object-fit: contain;
                     display: block;
                 }
                 .footer {
@@ -79,7 +79,7 @@ function createCertificateHtml(data) {
                 .footer img {
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
+                    object-fit: contain;
                     display: block;
                 }
                 .document-body {
