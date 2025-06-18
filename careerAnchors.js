@@ -231,67 +231,59 @@ function renderAnchorsChart(results) {
     const container = document.getElementById('anchors-chart');
     container.innerHTML = '';
     
-    // Цвета для разных якорей
+    // Цвета для якорей
     const colors = [
         '#237DF5', '#4CAF50', '#FFC107', 
         '#9C27B0', '#FF5722', '#607D8B',
         '#8BC34A', '#E91E63'
     ];
-    
-    // Создаем контейнер для графика
+
+    // Основной контейнер
     const chartContainer = document.createElement('div');
-    chartContainer.className = 'anchors-chart-container';
-    chartContainer.style.position = 'relative';
     chartContainer.style.width = '100%';
-    chartContainer.style.maxWidth = '500px';
+    chartContainer.style.maxWidth = '300px'; // Уменьшили максимальную ширину
     chartContainer.style.margin = '0 auto';
+
+    // Canvas для диаграммы (уменьшенный размер)
+    const canvas = document.createElement('canvas');
+    canvas.style.display = 'block';
+    canvas.width = 250;  // Фиксированная ширина
+    canvas.height = 250; // Фиксированная высота
+    chartContainer.appendChild(canvas);
+
+    // Компактная легенда
+    const compactLegend = document.createElement('div');
+    compactLegend.style.marginTop = '10px';
+    compactLegend.style.fontSize = '12px';
     
-    // Canvas для круговой диаграммы
-    const pieCanvas = document.createElement('canvas');
-    pieCanvas.className = 'anchors-pie-chart';
-    pieCanvas.style.display = 'block';
-    pieCanvas.style.width = '100%';
-    pieCanvas.style.height = 'auto';
-    chartContainer.appendChild(pieCanvas);
-    
-    // Легенда
-    const legend = document.createElement('div');
-    legend.className = 'anchors-legend';
-    legend.style.marginTop = '20px';
-    legend.style.display = 'flex';
-    legend.style.flexWrap = 'wrap';
-    legend.style.justifyContent = 'center';
-    
-    results.forEach((result, i) => {
+    results.slice(0, 3).forEach((result, i) => {
         const item = document.createElement('div');
-        item.className = 'anchor-legend-item';
         item.style.display = 'flex';
         item.style.alignItems = 'center';
-        item.style.margin = '5px 10px';
+        item.style.margin = '3px 0';
         
         const colorBox = document.createElement('span');
-        colorBox.className = 'anchor-color-box';
         colorBox.style.display = 'inline-block';
-        colorBox.style.width = '15px';
-        colorBox.style.height = '15px';
+        colorBox.style.width = '12px';
+        colorBox.style.height = '12px';
         colorBox.style.backgroundColor = colors[i];
         colorBox.style.marginRight = '5px';
-        colorBox.style.borderRadius = '3px';
+        colorBox.style.borderRadius = '2px';
         
         const label = document.createElement('span');
-        label.textContent = `${result.name} (${result.score.toFixed(1)})`;
+        label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
         
         item.appendChild(colorBox);
         item.appendChild(label);
-        legend.appendChild(item);
+        compactLegend.appendChild(item);
     });
-    
-    chartContainer.appendChild(legend);
+
+    chartContainer.appendChild(compactLegend);
     container.appendChild(chartContainer);
-    
-    // Инициализация круговой диаграммы
-    new Chart(pieCanvas, {
-        type: 'pie',
+
+    // Создаем компактную круговую диаграмму
+    new Chart(canvas, {
+        type: 'doughnut',
         data: {
             labels: results.map(item => item.name),
             datasets: [{
@@ -302,28 +294,22 @@ function renderAnchorsChart(results) {
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: true,
+            responsive: false, // Отключаем авто-масштабирование
+            maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false // Легенду выводим отдельно
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (context) => {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            return `${label}: ${value.toFixed(1)}/10`;
-                        },
-                        afterLabel: (context) => {
-                            return results[context.dataIndex].description;
-                        }
+                        label: (context) => 
+                            `${context.label}: ${context.raw.toFixed(1)}`
                     }
                 }
             },
-            cutout: '60%', // Можно сделать кольцевую диаграмму
+            cutout: '65%', // Делаем тоньше
+            rotation: -90, // Начинаем с верха
+            circumference: 360, // Полный круг
             animation: {
-                animateScale: true,
+                animateScale: false, // Упрощаем анимацию
                 animateRotate: true
             }
         }
