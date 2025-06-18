@@ -122,6 +122,9 @@ function prevCareerQuestion() {
 async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
+
+    window.anchorsResults = results;
+    window.anchorsTimeSpent = timeSpent;
     
     // Получаем данные из теста Голланда
     const hollandData = window.hollandResults || {
@@ -217,13 +220,18 @@ function calculateAnchorsResults() {
     }
     
     // Преобразуем в массив и сортируем
-    return Object.entries(scores)
+    const results = Object.entries(scores)
         .map(([key, score]) => ({
             name: getAnchorName(key),
             description: getAnchorDescription(key),
             score
         }))
         .sort((a, b) => b.score - a.score);
+
+    // Сохраняем топ-2 результата для отображения
+    window.topAnchors = results.slice(0, 2);
+    
+    return results;
 }
 
 function renderAnchorsChart(results) {

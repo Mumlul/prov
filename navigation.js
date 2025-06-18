@@ -161,12 +161,10 @@ export async function showResults() {
                 </div>
             `).join('');
             
-            // Обновляем время прохождения (если есть)
             if (window.anchorsTimeSpent) {
                 anchorsTimeSpent.textContent = window.anchorsTimeSpent;
             }
             
-            // Рендерим диаграмму только если есть контейнер
             if (anchorsChart) {
                 renderAnchorsChart(window.anchorsResults);
             }
