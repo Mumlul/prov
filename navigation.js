@@ -237,7 +237,7 @@ export async function showResults() {
 if (!window.renderAnchorsChart) {
     window.renderAnchorsChart = function(results) {
         if (!anchorsChart) return;
-        
+
         anchorsChart.innerHTML = '';
         try {
             const container = document.getElementById('anchors-chart');
@@ -289,7 +289,7 @@ if (!window.renderAnchorsChart) {
             legendContainer.style.flex = '1';
             legendContainer.style.minWidth = '200px';
             legendContainer.style.padding = '10px';
-            
+
             // Заголовок легенды
             const legendTitle = document.createElement('div');
             legendTitle.textContent = 'Карьерные ориентации';
@@ -304,7 +304,7 @@ if (!window.renderAnchorsChart) {
                 legendItem.style.display = 'flex';
                 legendItem.style.alignItems = 'center';
                 legendItem.style.margin = '8px 0';
-                
+
                 const colorBox = document.createElement('div');
                 colorBox.style.width = '15px';
                 colorBox.style.height = '15px';
@@ -312,14 +312,14 @@ if (!window.renderAnchorsChart) {
                 colorBox.style.borderRadius = '3px';
                 colorBox.style.marginRight = '10px';
                 colorBox.style.flexShrink = '0';
-                
+
                 const label = document.createElement('div');
                 label.style.flex = '1';
                 label.innerHTML = `
                     <div style="font-weight: 600;">${result.name}</div>
                     <div style="font-size: 0.9em; color: #555;">Оценка: ${result.score.toFixed(1)}</div>
                 `;
-                
+
                 legendItem.appendChild(colorBox);
                 legendItem.appendChild(label);
                 legendContainer.appendChild(legendItem);
