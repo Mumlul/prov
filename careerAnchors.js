@@ -35,7 +35,6 @@ const anchorsDescription = document.getElementById('anchors-description');
 const anchorsTimeSpent = document.getElementById('anchors-time-spent');
 const anchorsChart = document.getElementById('anchors-chart');
 
-
 // Инициализация теста
 function startCareerAnchorsTest() {
     currentQuestion = 0;
@@ -124,10 +123,6 @@ async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
     
-    // Сохраняем результаты в глобальную переменную для доступа из других функций
-    window.anchorsResults = results;
-    window.anchorsTimeSpent = timeSpent;
-    
     // Получаем данные из теста Голланда
     const hollandData = window.hollandResults || {
         name: userName,
@@ -138,7 +133,7 @@ async function finishCareerTest() {
         scores: { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 }
     };
 
-    // Сохранение результатов на сервер (ваш существующий код)
+    // Сохранение результатов
     try {
         const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
             method: 'POST',
@@ -173,35 +168,7 @@ async function finishCareerTest() {
         console.error("Ошибка при сохранении результатов:", error);
     }
     
-    // Обновляем DOM элементы с результатами теста якорей карьеры
-   if (results.length > 0) {
-        // Показываем 2 ведущие ориентации
-        if (anchorsResult) {
-            anchorsResult.textContent = results.slice(0, 2).map(r => r.name).join(', ');
-        }
-        
-        // Добавляем описания для ведущих ориентаций
-        if (anchorsDescription) {
-            anchorsDescription.innerHTML = results.slice(0, 2).map(r => `
-                <div class="anchor-result">
-                    <h4>${r.name} (${r.score.toFixed(1)})</h4>
-                    <p>${r.description}</p>
-                </div>
-            `).join('');
-        }
-        
-        // Обновляем время прохождения
-        if (anchorsTimeSpent) {
-            anchorsTimeSpent.textContent = timeSpent;
-        }
-        
-        // Рендерим диаграмму только если есть контейнер
-        if (anchorsChart && window.renderAnchorsChart) {
-            window.renderAnchorsChart(results);
-        }
-    }
-    
-    // Показываем результаты (переходим на страницу результатов)
+    // Показ результатов
     showResults();
     
     // Настройка кнопки PDF
@@ -213,12 +180,16 @@ function setupPdfButton() {
     if (!pdfButton) return;
     
     pdfButton.style.display = 'inline-block';
-    pdfButton.onclick = async (e) => {
-        e.preventDefault(); // Предотвращаем стандартное поведение
-        
+    pdfButton.onclick = async () => {
         try {
             const hollandData = window.prepareHollandCertificateData ? window.prepareHollandCertificateData() : null;
             const anchorsData = prepareAnchorsCertificateData();
+            
+            console.log('Данные для PDF:', { hollandData, anchorsData });
+            
+            if (!anchorsData?.results || anchorsData.results.length === 0) {
+                throw new Error('Нет данных теста Якорей карьеры');
+            }
             
             await generateCertificate(
                 hollandData || { 
@@ -232,8 +203,6 @@ function setupPdfButton() {
             console.error('Ошибка генерации PDF:', error);
             alert('Ошибка при создании PDF: ' + error.message);
         }
-        
-        return false;
     };
 }
 
@@ -258,82 +227,121 @@ function calculateAnchorsResults() {
 }
 
 function renderAnchorsChart(results) {
-    const container = document.getElementById('anchors-chart');
-    container.innerHTML = '';
-    // Цвета для якорей
-    const colors = [
-        '#237DF5', '#4CAF50', '#FFC107',
-        '#9C27B0', '#FF5722', '#607D8B',
-        '#8BC34A', '#E91E63'
-    ];
-    // Основной контейнер
-    const chartContainer = document.createElement('div');
-    chartContainer.style.width = '100%';
-    chartContainer.style.maxWidth = '300px'; // Уменьшили максимальную ширину
-    chartContainer.style.margin = '0 auto';
-    // Canvas для диаграммы (уменьшенный размер)
-    const canvas = document.createElement('canvas');
-    canvas.style.display = 'block';
-    canvas.width = 250;  // Фиксированная ширина
-    canvas.height = 250; // Фиксированная высота
-    chartContainer.appendChild(canvas);
-    // Компактная легенда
-    const compactLegend = document.createElement('div');
-    compactLegend.style.marginTop = '10px';
-    compactLegend.style.fontSize = '12px';
-    results.slice(0, 3).forEach((result, i) => {
-        const item = document.createElement('div');
-        item.style.display = 'flex';
-        item.style.alignItems = 'center';
-        item.style.margin = '3px 0';
-        const colorBox = document.createElement('span');
-        colorBox.style.display = 'inline-block';
-        colorBox.style.width = '12px';
-        colorBox.style.height = '12px';
-        colorBox.style.backgroundColor = colors[i];
-        colorBox.style.marginRight = '5px';
-        colorBox.style.borderRadius = '2px';
-        const label = document.createElement('span');
-        label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
-        item.appendChild(colorBox);
-        item.appendChild(label);
-        compactLegend.appendChild(item);
-    });
-    chartContainer.appendChild(compactLegend);
-    container.appendChild(chartContainer);
-    // Создаем компактную круговую диаграмму
-    new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: results.map(item => item.name),
-            datasets: [{
-                data: results.map(item => item.score),
-                backgroundColor: colors,
-                borderWidth: 1,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: false, // Отключаем авто-масштабирование
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (context) =>
-                            `${context.label}: ${context.raw.toFixed(1)}`
-                    }
-                }
-            },
-            cutout: '65%', // Делаем тоньше
-            rotation: -90, // Начинаем с верха
-            circumference: 360, // Полный круг
-            animation: {
-                animateScale: false, // Упрощаем анимацию
-                animateRotate: true
-            }
+    try {
+        const container = document.getElementById('anchors-chart');
+        if (!container) {
+            console.error('Контейнер для диаграммы не найден');
+            return;
         }
-    });
+
+        if (!results || results.length === 0) {
+            console.error('Нет данных для диаграммы');
+            container.innerHTML = '<p>Нет данных для отображения</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        
+        // Цвета для якорей
+        const colors = [
+            '#237DF5', '#4CAF50', '#FFC107',
+            '#9C27B0', '#FF5722', '#607D8B',
+            '#8BC34A', '#E91E63'
+        ];
+
+        // Основной контейнер
+        const chartContainer = document.createElement('div');
+        chartContainer.style.width = '100%';
+        chartContainer.style.maxWidth = '300px';
+        chartContainer.style.margin = '0 auto';
+
+        // Canvas для диаграммы
+        const canvas = document.createElement('canvas');
+        canvas.style.display = 'block';
+        canvas.width = 250;
+        canvas.height = 250;
+        canvas.style.width = '250px';
+        canvas.style.height = '250px';
+        chartContainer.appendChild(canvas);
+
+        // Компактная легенда
+        const compactLegend = document.createElement('div');
+        compactLegend.style.marginTop = '10px';
+        compactLegend.style.fontSize = '12px';
+        
+        results.slice(0, 3).forEach((result, i) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.margin = '3px 0';
+            
+            const colorBox = document.createElement('span');
+            colorBox.style.display = 'inline-block';
+            colorBox.style.width = '12px';
+            colorBox.style.height = '12px';
+            colorBox.style.backgroundColor = colors[i];
+            colorBox.style.marginRight = '5px';
+            colorBox.style.borderRadius = '2px';
+            
+            const label = document.createElement('span');
+            label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
+            
+            item.appendChild(colorBox);
+            item.appendChild(label);
+            compactLegend.appendChild(item);
+        });
+
+        chartContainer.appendChild(compactLegend);
+        container.appendChild(chartContainer);
+
+        // Проверка наличия Chart.js
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js не загружен');
+            container.innerHTML = '<p>Ошибка загрузки библиотеки графиков</p>';
+            return;
+        }
+
+        // Создаем диаграмму
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: results.map(item => item.name),
+                datasets: [{
+                    data: results.map(item => item.score),
+                    backgroundColor: colors,
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => 
+                                `${context.label}: ${context.raw.toFixed(1)}`
+                        }
+                    }
+                },
+                cutout: '65%',
+                rotation: -90,
+                circumference: 360,
+                animation: {
+                    animateScale: false,
+                    animateRotate: true
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Ошибка при создании диаграммы:', error);
+        const container = document.getElementById('anchors-chart');
+        if (container) {
+            container.innerHTML = '<p>Ошибка при отображении диаграммы</p>';
+        }
+    }
 }
 
 // Обработчик изменения размера окна

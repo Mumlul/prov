@@ -41,18 +41,26 @@ export async function generateCertificate(hollandData, anchorsData) {
         let hollandProfessions = [];
 
         if (hollandData) {
-            hollandType = hollandData.types || 'Не определено';
-            hollandDescription = hollandData.description || 'Тест Холланда не пройден';
+            hollandType = hollandData.personality || 'Не определено';
+            hollandDescription = '';
             hollandProfessions = Array.isArray(hollandData.professions) ? hollandData.professions : [];
         }
+
+        // Парсим данные обоих типов из строки "Тип + Тип"
+        const types = hollandType.split('+').map(t => t.trim());
+        const descriptions = types.map(type => {
+            return HOLLAND_TYPES[type] ? HOLLAND_TYPES[type].description : `Описание для "${type}" не найдено`;
+        });
 
         // Подготовка данных для PDF
         const certificateData = {
             name: userName,
             group: userGroup,
             date: formattedDate,
-            hollandTypes: hollandData.hollandTypes || [],
-            hollandDescription: hollandDescription,
+            hollandTypes: types.map((type, index) => ({
+                type,
+                description: descriptions[index]
+            })),
             hollandProfessions: hollandProfessions,
             anchorsResults: anchorsData?.results || []
         };
@@ -213,175 +221,210 @@ function createHollandPageHtml(data) {
     `;
 }
 
+// function createAnchorsPageHtml(data) {
+//     // Берём только 2 лучших результата
+//     const topAnchors = [...data.anchorsResults]
+//         .sort((a, b) => b.score - a.score)
+//         .slice(0, 2);
+
+//     // Создаем данные для легенды
+//     const legendItems = data.anchorsResults
+//         .sort((a, b) => b.score - a.score)
+//         .map((item, index) => ({
+//             name: item.name,
+//             score: item.score.toFixed(1),
+//             color: ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#843b62', '#F28482'][index % 6]
+//         }));
+
+//     return `
+//         <!DOCTYPE html>
+//         <html lang="ru">
+//         <head>
+//             <meta charset="UTF-8">
+//             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//             <title>Результаты теста "Якоря карьеры"</title>
+//             <style>
+//                 body {
+//                     font-family: 'Arial', sans-serif;
+//                     margin: 0;
+//                     padding: 15mm 20mm;
+//                     line-height: 1.6;
+//                     font-size: 11pt;
+//                     background-color: #ffffff;
+//                     color: #333333;
+//                     width: 210mm;
+//                     height: 297mm;
+//                     box-sizing: border-box;
+//                 }
+//                 .header {
+//                     margin-bottom: 8mm;
+//                     text-align: center;
+//                 }
+//                 .main-title {
+//                     font-size: 16pt;
+//                     font-weight: bold;
+//                     color: #2337A5;
+//                     margin-bottom: 3mm;
+//                     text-transform: uppercase;
+//                 }
+//                 .subtitle {
+//                     font-size: 12pt;
+//                     color: #666666;
+//                 }
+//                 .section {
+//                     margin-bottom: 10mm;
+//                 }
+//                 .section-title {
+//                     font-size: 14pt;
+//                     font-weight: bold;
+//                     color: #2337A5;
+//                     margin-bottom: 5mm;
+//                     border-bottom: 2px solid #eeeeee;
+//                     padding-bottom: 2mm;
+//                 }
+//                 .anchor-item {
+//                     margin-bottom: 8mm;
+//                     padding: 0 10mm;
+//                 }
+//                 .anchor-header {
+//                     display: flex;
+//                     justify-content: space-between;
+//                     align-items: center;
+//                     margin-bottom: 3mm;
+//                 }
+//                 .anchor-name {
+//                     font-size: 13pt;
+//                     font-weight: bold;
+//                     color: #2337A5;
+//                 }
+//                 .anchor-score {
+//                     font-size: 13pt;
+//                     font-weight: bold;
+//                     color: #ffffff;
+//                     background-color: #2337A5;
+//                     padding: 2mm 4mm;
+//                     border-radius: 4px;
+//                 }
+//                 .chart-container {
+//                     margin-top: 15mm;
+//                     text-align: center;
+//                     position: relative;
+//                 }
+//                 .chart-title {
+//                     font-size: 13pt;
+//                     font-weight: bold;
+//                     color: #2337A5;
+//                     margin-bottom: 5mm;
+//                 }
+//                 .chart-image {
+//                     width: 100%;
+//                     max-width: 300px;
+//                     margin: 0 auto;
+//                     display: block;
+//                 }
+//                 .legend {
+//                     margin-top: 10px;
+//                     text-align: center;
+//                 }
+//                 .legend-item {
+//                     display: inline-block;
+//                     margin: 5px 10px;
+//                     font-size: 10pt;
+//                 }
+//                 .legend-color {
+//                     display: inline-block;
+//                     width: 12px;
+//                     height: 12px;
+//                     border-radius: 50%;
+//                     margin-right: 5px;
+//                 }
+//                 .footer {
+//                     text-align: center;
+//                     margin-top: 15mm;
+//                     font-size: 9pt;
+//                     color: #999999;
+//                 }
+//             </style>
+//         </head>
+//         <body>
+//             <div class="header">
+//                 <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
+//                 <div class="subtitle">Тест "Якоря карьеры" Шейна</div>
+//             </div>
+//             ${topAnchors.length > 0 ? `
+//             <div class="section">
+//                 <div class="section-title">Ваши карьерные ориентации</div>
+//                 ${topAnchors.map(item => `
+//                     <div class="anchor-item">
+//                         <div class="anchor-header">
+//                             <div class="anchor-name">${item.name}</div>
+//                             <div class="anchor-score">${item.score.toFixed(1)}</div>
+//                         </div>
+//                         <div class="anchor-description">${item.description || 'Описание отсутствует'}</div>
+//                     </div>
+//                 `).join('')}
+//             </div>
+//             ` : ''}
+//             <div class="chart-container">
+//                 <div class="chart-title">Распределение якорей карьеры</div>
+//                 <div class="legend">
+//                     ${legendItems.map(item => `
+//                         <div class="legend-item">
+//                             <span class="legend-color" style="background-color: ${item.color};"></span>
+//                             ${item.name}: ${item.score}
+//                         </div>
+//                     `).join('')}
+//                 </div>
+//             </div>
+//             <div class="footer">
+//                 Страница 2 из 2 · Документ сгенерирован автоматически
+//             </div>
+//         </body>
+//         </html>
+//     `;
+// }
 function createAnchorsPageHtml(data) {
-    // Берём только 2 лучших результата
     const topAnchors = [...data.anchorsResults]
         .sort((a, b) => b.score - a.score)
         .slice(0, 2);
-
-    // Создаем данные для круговой диаграммы
-    const chartData = {
-        labels: data.anchorsResults.map(item => item.name),
-        datasets: [
-            {
-                data: data.anchorsResults.map(item => item.score),
-                backgroundColor: ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#843b62', '#F28482'],
-                borderColor: '#fff',
-                borderWidth: 1
-            }
-        ]
-    };
 
     return `
         <!DOCTYPE html>
         <html lang="ru">
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Результаты теста "Якоря карьеры"</title>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
             <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    margin: 0;
-                    padding: 15mm 20mm; /* Увеличим отступы */
-                    line-height: 1.6;
-                    font-size: 11pt;
-                    background-color: #ffffff;
-                    color: #333333;
-                    width: 210mm;
-                    height: 297mm;
-                    box-sizing: border-box;
-                }
-                .header {
-                    margin-bottom: 8mm;
-                    text-align: center;
-                }
-                .main-title {
-                    font-size: 16pt;
-                    font-weight: bold;
-                    color: #2337A5;
-                    margin-bottom: 3mm;
-                    text-transform: uppercase;
-                }
-                .subtitle {
-                    font-size: 12pt;
-                    color: #666666;
-                }
-                .section {
-                    margin-bottom: 10mm;
-                }
-                .section-title {
-                    font-size: 14pt;
-                    font-weight: bold;
-                    color: #2337A5;
-                    margin-bottom: 5mm;
-                    border-bottom: 2px solid #eeeeee;
-                    padding-bottom: 2mm;
-                }
-                .anchor-item {
-                    margin-bottom: 8mm;
-                    padding: 0 10mm;
-                }
-                .anchor-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 3mm;
-                }
-                .anchor-name {
-                    font-size: 13pt;
-                    font-weight: bold;
-                    color: #2337A5;
-                }
-                .anchor-score {
-                    font-size: 13pt;
-                    font-weight: bold;
-                    color: #ffffff;
-                    background-color: #2337A5;
-                    padding: 2mm 4mm;
-                    border-radius: 4px;
-                }
-                .chart-placeholder {
-                    width: 100%;
-                    height: 300px;
-                    background-color: #f5f5f5;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                .chart-visualization {
                     margin: 20px 0;
-                    border-radius: 8px;
                 }
-                .anchor-description {
-                    text-align: justify;
-                }
-                .chart-container {
-                    margin-top: 15mm;
-                    text-align: center;
-                }
-                canvas {
-                    max-width: 100%;
-                    height: auto;
-                }
-                .chart-title {
-                    font-size: 13pt;
-                    font-weight: bold;
-                    color: #2337A5;
-                    margin-bottom: 5mm;
-                }
-                .legend {
-                    position: absolute;
-                    right: 20mm;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 10pt;
-                }
-                .legend-item {
+                .chart-bar {
                     display: flex;
                     align-items: center;
-                    margin-bottom: 3mm;
+                    margin: 8px 0;
                 }
-                .legend-color {
-                    display: inline-block;
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    margin-right: 5px;
+                .chart-bar-color {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 4px;
+                    margin-right: 10px;
                 }
-                .footer {
-                    text-align: center;
-                    margin-top: 15mm;
-                    font-size: 9pt;
-                    color: #999999;
+                .chart-bar-label {
+                    min-width: 200px;
+                }
+                .chart-bar-value {
+                    font-weight: bold;
                 }
             </style>
         </head>
         <body>
-            <div class="header">
-                <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
-                <div class="subtitle">Тест "Якоря карьеры" Шейна</div>
-            </div>
-            ${topAnchors.length > 0 ? `
-            <div class="section">
-                <div class="section-title">Ваши карьерные ориентации</div>
-                ${topAnchors.map(item => `
-                    <div class="anchor-item">
-                        <div class="anchor-header">
-                            <div class="anchor-name">${item.name}</div>
-                            <div class="anchor-score">${item.score.toFixed(1)}</div>
-                        </div>
-                        <div class="anchor-description">${item.description || 'Описание отсутствует'}</div>
+            <div class="chart-visualization">
+                ${data.chartData.labels.map((label, index) => `
+                    <div class="chart-bar">
+                        <div class="chart-bar-color" style="background-color: ${data.chartData.colors[index % data.chartData.colors.length]};"></div>
+                        <div class="chart-bar-label">${label}</div>
+                        <div class="chart-bar-value">${data.chartData.scores[index].toFixed(1)}</div>
                     </div>
                 `).join('')}
-            </div>
-            ` : ''}
-            <div class="chart-container">
-                <div class="chart-title">Распределение якорей карьеры</div>
-                <div class="chart-placeholder">
-                </div>
-            </div>
-            <div class="footer">
-                Страница 2 из 2 · Документ сгенерирован автоматически
             </div>
         </body>
         </html>
