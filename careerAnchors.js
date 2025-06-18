@@ -227,38 +227,32 @@ function calculateAnchorsResults() {
 function renderAnchorsChart(results) {
     const container = document.getElementById('anchors-chart');
     container.innerHTML = '';
-    
     // Цвета для якорей
     const colors = [
-        '#237DF5', '#4CAF50', '#FFC107', 
+        '#237DF5', '#4CAF50', '#FFC107',
         '#9C27B0', '#FF5722', '#607D8B',
         '#8BC34A', '#E91E63'
     ];
-
     // Основной контейнер
     const chartContainer = document.createElement('div');
     chartContainer.style.width = '100%';
     chartContainer.style.maxWidth = '300px'; // Уменьшили максимальную ширину
     chartContainer.style.margin = '0 auto';
-
     // Canvas для диаграммы (уменьшенный размер)
     const canvas = document.createElement('canvas');
     canvas.style.display = 'block';
     canvas.width = 250;  // Фиксированная ширина
     canvas.height = 250; // Фиксированная высота
     chartContainer.appendChild(canvas);
-
     // Компактная легенда
     const compactLegend = document.createElement('div');
     compactLegend.style.marginTop = '10px';
     compactLegend.style.fontSize = '12px';
-    
     results.slice(0, 3).forEach((result, i) => {
         const item = document.createElement('div');
         item.style.display = 'flex';
         item.style.alignItems = 'center';
         item.style.margin = '3px 0';
-        
         const colorBox = document.createElement('span');
         colorBox.style.display = 'inline-block';
         colorBox.style.width = '12px';
@@ -266,18 +260,14 @@ function renderAnchorsChart(results) {
         colorBox.style.backgroundColor = colors[i];
         colorBox.style.marginRight = '5px';
         colorBox.style.borderRadius = '2px';
-        
         const label = document.createElement('span');
         label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
-        
         item.appendChild(colorBox);
         item.appendChild(label);
         compactLegend.appendChild(item);
     });
-
     chartContainer.appendChild(compactLegend);
     container.appendChild(chartContainer);
-
     // Создаем компактную круговую диаграмму
     new Chart(canvas, {
         type: 'doughnut',
@@ -297,7 +287,7 @@ function renderAnchorsChart(results) {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (context) => 
+                        label: (context) =>
                             `${context.label}: ${context.raw.toFixed(1)}`
                     }
                 }

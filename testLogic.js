@@ -301,7 +301,6 @@ function getDescriptionByType(type) {
 function prepareHollandCertificateData() {
     const personalityType = determinePersonality(scores);
     const personalityInfo = getPersonalityDescription(personalityType);
-    
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
             type: getDescriptionByType(type).name,
@@ -309,8 +308,12 @@ function prepareHollandCertificateData() {
         }))
         .sort((a, b) => b.score - a.score);
 
+    // Если первый тип не определен, попробуем использовать второй
+    let primaryType = sortedScores[0].type;
+    let secondaryType = sortedScores[1]?.type || '';
+
     return {
-        types: `${sortedScores[0].type}${sortedScores[1] ? ` + ${sortedScores[1].type}` : ''}`,
+        types: `${primaryType}${secondaryType ? ` + ${secondaryType}` : ''}`,
         description: personalityInfo.fullDescription.replace(/<[^>]+>/g, ''),
         professions: personalityInfo.recommendedProfessions
     };

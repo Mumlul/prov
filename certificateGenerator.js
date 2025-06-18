@@ -35,22 +35,23 @@ export async function generateCertificate(hollandData, anchorsData) {
             year: 'numeric'
         });
 
-        // Обрабатываем типы Холланда - новая логика
+        // Обработка данных теста Холланда
         let hollandType = 'Не определено';
         let hollandDescription = 'Тест Холланда не пройден';
         let hollandProfessions = [];
-        
+
         if (hollandData) {
             hollandType = hollandData.types || 'Не определено';
             hollandDescription = hollandData.description || 'Тест Холланда не пройден';
             hollandProfessions = Array.isArray(hollandData.professions) ? hollandData.professions : [];
         }
 
+        // Подготовка данных для PDF
         const certificateData = {
             name: userName,
             group: userGroup,
             date: formattedDate,
-            hollandType: hollandType,
+            hollandTypes: hollandData.hollandTypes || [],
             hollandDescription: hollandDescription,
             hollandProfessions: hollandProfessions,
             anchorsResults: anchorsData?.results || []
@@ -62,16 +63,15 @@ export async function generateCertificate(hollandData, anchorsData) {
             format: 'a4'
         });
 
-        // Генерация первой страницы (Голланд)
+        // Первая страница — Холланд
         const hollandHtml = createHollandPageHtml(certificateData);
         await addPageToPdf(pdf, hollandHtml, true);
 
-        // Генерация второй страницы (Якоря карьеры)
+        // Вторая страница — Якоря
         const anchorsHtml = createAnchorsPageHtml(certificateData);
         await addPageToPdf(pdf, anchorsHtml, false);
 
         pdf.save(`Профориентация_${userName.replace(/\s+/g, '_')}.pdf`);
-
     } catch (error) {
         console.error('Ошибка при создании сертификата:', error);
         alert('Не удалось сгенерировать сертификат. Пожалуйста, попробуйте позже.');
@@ -79,6 +79,13 @@ export async function generateCertificate(hollandData, anchorsData) {
 }
 
 function createHollandPageHtml(data) {
+    const typeBlocks = data.hollandTypes.map((item, idx) => `
+        <div class="type-section">
+            <div class="type-name">${item.type}</div>
+            <div class="type-description">${item.description}</div>
+        </div>
+    `).join('');
+
     return `
         <!DOCTYPE html>
         <html lang="ru">
@@ -90,7 +97,7 @@ function createHollandPageHtml(data) {
                 body {
                     font-family: 'Arial', sans-serif;
                     margin: 0;
-                    padding: 15mm 20mm; // Уменьшили отступы с 20mm 25mm
+                    padding: 15mm 20mm; /* Увеличим отступы */
                     line-height: 1.6;
                     font-size: 11pt;
                     background-color: #ffffff;
@@ -181,25 +188,15 @@ function createHollandPageHtml(data) {
                 <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
                 <div class="subtitle">Тест Холланда на определение типа личности</div>
             </div>
-
             <div class="user-info">
-                <div class="info-row">
-                    <span class="info-label">ФИО:</span> ${data.name}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Группа/класс:</span> ${data.group}
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Дата тестирования:</span> ${data.date}
-                </div>
+                <div class="info-row"><span class="info-label">ФИО:</span> ${data.name}</div>
+                <div class="info-row"><span class="info-label">Группа/класс:</span> ${data.group}</div>
+                <div class="info-row"><span class="info-label">Дата тестирования:</span> ${data.date}</div>
             </div>
-
             <div class="section">
                 <div class="section-title">Ваш тип личности</div>
-                <div class="type-name">${data.hollandType || 'Не определено'}</div>
-                <div class="type-description">${data.hollandDescription || ''}</div>
+                ${typeBlocks}
             </div>
-
             ${Array.isArray(data.hollandProfessions) && data.hollandProfessions.length > 0 ? `
             <div class="section">
                 <div class="section-title">Рекомендуемые профессии</div>
@@ -208,7 +205,6 @@ function createHollandPageHtml(data) {
                 </ul>
             </div>
             ` : ''}
-
             <div class="footer">
                 Страница 1 из 2 · Документ сгенерирован автоматически
             </div>
@@ -218,6 +214,24 @@ function createHollandPageHtml(data) {
 }
 
 function createAnchorsPageHtml(data) {
+    // Берём только 2 лучших результата
+    const topAnchors = [...data.anchorsResults]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2);
+
+    // Создаем данные для круговой диаграммы
+    const chartData = {
+        labels: data.anchorsResults.map(item => item.name),
+        datasets: [
+            {
+                data: data.anchorsResults.map(item => item.score),
+                backgroundColor: ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#843b62', '#F28482'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }
+        ]
+    };
+
     return `
         <!DOCTYPE html>
         <html lang="ru">
@@ -225,11 +239,12 @@ function createAnchorsPageHtml(data) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Результаты теста "Якоря карьеры"</title>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
             <style>
                 body {
                     font-family: 'Arial', sans-serif;
                     margin: 0;
-                    padding: 15mm 20mm; 
+                    padding: 15mm 20mm; /* Увеличим отступы */
                     line-height: 1.6;
                     font-size: 11pt;
                     background-color: #ffffff;
@@ -290,6 +305,39 @@ function createAnchorsPageHtml(data) {
                 .anchor-description {
                     text-align: justify;
                 }
+                .chart-container {
+                    margin-top: 15mm;
+                    text-align: center;
+                }
+                canvas {
+                    max-width: 100%;
+                    height: auto;
+                }
+                .chart-title {
+                    font-size: 13pt;
+                    font-weight: bold;
+                    color: #2337A5;
+                    margin-bottom: 5mm;
+                }
+                .legend {
+                    position: absolute;
+                    right: 20mm;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    font-size: 10pt;
+                }
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 3mm;
+                }
+                .legend-color {
+                    display: inline-block;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    margin-right: 5px;
+                }
                 .footer {
                     text-align: center;
                     margin-top: 15mm;
@@ -303,12 +351,10 @@ function createAnchorsPageHtml(data) {
                 <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
                 <div class="subtitle">Тест "Якоря карьеры" Шейна</div>
             </div>
-
-            ${Array.isArray(data.anchorsResults) && data.anchorsResults.length > 0 ? `
+            ${topAnchors.length > 0 ? `
             <div class="section">
                 <div class="section-title">Ваши карьерные ориентации</div>
-                
-                ${data.anchorsResults.map(item => `
+                ${topAnchors.map(item => `
                     <div class="anchor-item">
                         <div class="anchor-header">
                             <div class="anchor-name">${item.name}</div>
@@ -319,7 +365,37 @@ function createAnchorsPageHtml(data) {
                 `).join('')}
             </div>
             ` : ''}
-
+            <div class="chart-container">
+                <div class="chart-title">Распределение якорей карьеры</div>
+                <canvas id="anchor-chart"></canvas>
+                <script>
+                    const ctx = document.getElementById('anchor-chart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: ${JSON.stringify(chartData)},
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        fontSize: 12
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Распределение якорей карьеры',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            }
+                        }
+                    });
+                </script>
+            </div>
             <div class="footer">
                 Страница 2 из 2 · Документ сгенерирован автоматически
             </div>
@@ -335,11 +411,10 @@ async function addPageToPdf(pdf, html, isFirstPage) {
         tempDiv.style.left = '-9999px';
         tempDiv.style.width = '210mm';
         tempDiv.style.height = '297mm';
-        tempDiv.style.padding = '0';
+        tempDiv.style.padding = '0 20mm';
         tempDiv.style.boxSizing = 'border-box';
         tempDiv.innerHTML = html;
         document.body.appendChild(tempDiv);
-
         setTimeout(async () => {
             try {
                 const canvas = await html2canvas(tempDiv, {
@@ -353,13 +428,10 @@ async function addPageToPdf(pdf, html, isFirstPage) {
                     windowWidth: tempDiv.scrollWidth,
                     windowHeight: tempDiv.scrollHeight
                 });
-
                 const imgData = canvas.toDataURL('image/png');
-                
                 if (!isFirstPage) {
                     pdf.addPage();
                 }
-                
                 pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
                 document.body.removeChild(tempDiv);
                 resolve();
