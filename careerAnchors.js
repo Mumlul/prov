@@ -123,6 +123,9 @@ async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
     
+    // Сохраняем результаты в глобальную переменную для доступа из других функций
+    window.anchorsResults = results;
+    
     // Получаем данные из теста Голланда
     const hollandData = window.hollandResults || {
         name: userName,
@@ -133,7 +136,7 @@ async function finishCareerTest() {
         scores: { I: 0, II: 0, III: 0, IV: 0, V: 0, VI: 0 }
     };
 
-    // Сохранение результатов
+    // Сохранение результатов на сервер (ваш существующий код)
     try {
         const response = await fetch(`${API_BASE_URL}${RESULTS_ENDPOINT}`, {
             method: 'POST',
@@ -168,7 +171,27 @@ async function finishCareerTest() {
         console.error("Ошибка при сохранении результатов:", error);
     }
     
-    // Показ результатов
+    // Обновляем DOM элементы с результатами теста якорей карьеры
+    if (results.length > 0) {
+        // Показываем 2 ведущие ориентации
+        anchorsResult.textContent = results.slice(0, 2).map(r => r.name).join(', ');
+        
+        // Добавляем описания для ведущих ориентаций
+        anchorsDescription.innerHTML = results.slice(0, 2).map(r => `
+            <div class="anchor-result">
+                <h4>${r.name} (${r.score.toFixed(1)})</h4>
+                <p>${r.description}</p>
+            </div>
+        `).join('');
+        
+        // Обновляем время прохождения
+        anchorsTimeSpent.textContent = timeSpent;
+        
+        // Рендерим диаграмму
+        renderAnchorsChart(results);
+    }
+    
+    // Показываем результаты (переходим на страницу результатов)
     showResults();
     
     // Настройка кнопки PDF

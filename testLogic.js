@@ -304,18 +304,22 @@ function prepareHollandCertificateData() {
     const sortedScores = Object.entries(scores)
         .map(([type, score]) => ({
             type: getDescriptionByType(type).name,
-            score
+            score,
+            key: type
         }))
         .sort((a, b) => b.score - a.score);
 
-    // Если первый тип не определен, попробуем использовать второй
-    let primaryType = sortedScores[0].type;
-    let secondaryType = sortedScores[1]?.type || '';
+    // Получаем описания для типов
+    const hollandTypes = sortedScores.map(item => ({
+        type: item.type,
+        description: getPersonalityDescription(item.key).fullDescription
+    }));
 
     return {
-        types: `${primaryType}${secondaryType ? ` + ${secondaryType}` : ''}`,
-        description: personalityInfo.fullDescription.replace(/<[^>]+>/g, ''),
-        professions: personalityInfo.recommendedProfessions
+        types: `${sortedScores[0].type}${sortedScores[1] ? ` + ${sortedScores[1].type}` : ''}`,
+        description: personalityInfo.fullDescription,
+        professions: personalityInfo.recommendedProfessions,
+        hollandTypes: hollandTypes // Добавляем массив типов с описаниями
     };
 }
 

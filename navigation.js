@@ -109,14 +109,60 @@ restartBtn.addEventListener('click', () => {
 
 // Показ результатов (без изменений)
 export async function showResults() {
+    // Скрываем тесты и показываем страницу результатов
     quizContainer.style.display = 'none';
     careerAnchorsQuiz.style.display = 'none';
     resultContainer.style.display = 'block';
     
     try {
+        // 1. Получаем данные обоих тестов
         const hollandData = window.prepareHollandCertificateData?.();
         const anchorsData = window.prepareAnchorsCertificateData?.();
         
+        // 2. Отображаем результаты теста Холланда
+        if (window.hollandResults) {
+            const { personality, time } = window.hollandResults;
+            resultPersonality.textContent = personality;
+            hollandTimeSpent.textContent = time;
+            
+            // Если есть данные для описания
+            if (hollandData) {
+                const description = hollandData.description || 'Описание недоступно';
+                hollandDescription.innerHTML = description;
+                
+                if (hollandData.professions?.length > 0) {
+                    hollandProfessions.innerHTML = hollandData.professions
+                        .map(prof => `<li>${prof}</li>`)
+                        .join('');
+                }
+            }
+        }
+        
+        // 3. Отображаем результаты теста "Якоря карьеры"
+        if (window.anchorsResults) {
+            const topAnchors = window.anchorsResults.slice(0, 2);
+            
+            // Обновляем текстовые результаты
+            anchorsResult.textContent = topAnchors.map(a => a.name).join(', ');
+            
+            // Добавляем описания
+            anchorsDescription.innerHTML = topAnchors.map(anchor => `
+                <div class="anchor-result">
+                    <h4>${anchor.name} (${anchor.score.toFixed(1)})</h4>
+                    <p>${anchor.description}</p>
+                </div>
+            `).join('');
+            
+            // Обновляем время прохождения (если есть)
+            if (window.anchorsTimeSpent) {
+                anchorsTimeSpent.textContent = window.anchorsTimeSpent;
+            }
+            
+            // Рендерим диаграмму
+            renderAnchorsChart(window.anchorsResults);
+        }
+        
+        // 4. Настраиваем кнопку PDF (ваш существующий код с улучшениями)
         if (hollandData && anchorsData) {
             const oldBtn = document.querySelector('#resultContainer .pdf-btn');
             if (oldBtn) oldBtn.remove();
@@ -131,9 +177,18 @@ export async function showResults() {
                 try {
                     pdfBtn.disabled = true;
                     pdfBtn.textContent = 'Генерация PDF...';
-                    await generateCertificate(hollandData, anchorsData);
+                    
+                    // Добавляем обработку ошибок для генерации
+                    await generateCertificate(
+                        hollandData || { 
+                            types: 'Не определено', 
+                            description: 'Тест Голланда не пройден', 
+                            professions: [] 
+                        },
+                        anchorsData || { results: [] }
+                    );
                 } catch (error) {
-                    console.error('Ошибка:', error);
+                    console.error('Ошибка генерации PDF:', error);
                     alert('Не удалось сгенерировать PDF. Пожалуйста, попробуйте позже.');
                 } finally {
                     pdfBtn.disabled = false;
@@ -143,10 +198,27 @@ export async function showResults() {
             
             const resultFooter = document.querySelector('#resultContainer .result-content');
             if (resultFooter) {
-                resultFooter.insertBefore(pdfBtn, document.getElementById('restart-btn'));
+                const restartBtn = document.getElementById('restart-btn');
+                if (restartBtn) {
+                    resultFooter.insertBefore(pdfBtn, restartBtn);
+                } else {
+                    resultFooter.appendChild(pdfBtn);
+                }
             }
         }
+        
     } catch (error) {
-        console.error('Ошибка при подготовке данных сертификата:', error);
+        console.error('Ошибка при отображении результатов:', error);
+        
+        // Показываем сообщение об ошибке пользователю
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        errorElement.innerHTML = `
+            <p>Произошла ошибка при отображении результатов.</p>
+            <button onclick="location.reload()">Попробовать снова</button>
+        `;
+        
+        resultContainer.innerHTML = '';
+        resultContainer.appendChild(errorElement);
     }
 }

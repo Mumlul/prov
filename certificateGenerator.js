@@ -302,6 +302,16 @@ function createAnchorsPageHtml(data) {
                     padding: 2mm 4mm;
                     border-radius: 4px;
                 }
+                .chart-placeholder {
+                    width: 100%;
+                    height: 300px;
+                    background-color: #f5f5f5;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 20px 0;
+                    border-radius: 8px;
+                }
                 .anchor-description {
                     text-align: justify;
                 }
@@ -367,34 +377,8 @@ function createAnchorsPageHtml(data) {
             ` : ''}
             <div class="chart-container">
                 <div class="chart-title">Распределение якорей карьеры</div>
-                <canvas id="anchor-chart"></canvas>
-                <script>
-                    const ctx = document.getElementById('anchor-chart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'pie',
-                        data: ${JSON.stringify(chartData)},
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    labels: {
-                                        usePointStyle: true,
-                                        pointStyle: 'circle',
-                                        fontSize: 12
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Распределение якорей карьеры',
-                                    font: {
-                                        size: 14
-                                    }
-                                }
-                            }
-                        }
-                    });
-                </script>
+                <div class="chart-placeholder">
+                </div>
             </div>
             <div class="footer">
                 Страница 2 из 2 · Документ сгенерирован автоматически

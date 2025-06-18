@@ -1038,3 +1038,21 @@ main {
 .anchors-chart-container {
     text-align: center;
 }
+
+.anchor-result {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #237DF5;
+}
+
+.anchor-result h4 {
+    color: #2337A5;
+    margin-bottom: 10px;
+}
+
+.anchor-result p {
+    color: #555;
+    line-height: 1.6;
+}
