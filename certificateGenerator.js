@@ -1,6 +1,6 @@
 import { userName, userGroup } from './navigation.js';
 
-const { jsPDF } = window.jspdf;
+// const { jsPDF } = window.jspdf;
 
 export async function generateCertificate(hollandData, anchorsData) {
     try {
