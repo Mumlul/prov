@@ -932,3 +932,98 @@ main {
 .pie-chart:hover .chart-tooltip {
     opacity: 1;
 }
+.anchors-chart-container {
+    margin: 30px 0;
+    position: relative;
+}
+
+/* Десктопная версия - горизонтальные бары */
+.anchors-bar-chart {
+    display: block;
+    height: 300px;
+}
+
+/* Мобильная версия - компактные вертикальные бары */
+.anchors-compact-chart {
+    display: none;
+    height: auto;
+}
+
+/* Стили для легенды */
+.anchors-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.anchor-legend-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background-color: #f5f9ff;
+    font-size: 14px;
+}
+
+.anchor-color-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    margin-right: 8px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .anchors-bar-chart {
+        display: none;
+    }
+    
+    .anchors-compact-chart {
+        display: block;
+    }
+    
+    .anchor-legend-item {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+}
+
+/* Стили для компактного графика */
+.compact-chart-item {
+    margin-bottom: 15px;
+}
+
+.compact-chart-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.compact-chart-bar {
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.compact-chart-progress {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #237DF5, #2337A5);
+    transition: width 0.5s ease;
+}
+
+.compact-chart-value {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}

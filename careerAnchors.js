@@ -227,126 +227,124 @@ function calculateAnchorsResults() {
         .sort((a, b) => b.score - a.score);
 }
 
-function renderChart(results) {
-    const ctx = document.createElement('canvas');
-    anchorsChart.innerHTML = '';
-    anchorsChart.appendChild(ctx);
+function renderAnchorsChart(results) {
+    const container = document.getElementById('anchors-chart');
+    container.innerHTML = '';
     
-    // Определяем тип графика в зависимости от ширины экрана
-    const isMobile = window.innerWidth <= 768;
+    // Цвета для разных якорей
+    const colors = [
+        '#237DF5', '#4CAF50', '#FFC107', 
+        '#9C27B0', '#FF5722', '#607D8B',
+        '#8BC34A', '#E91E63'
+    ];
     
-    if (isMobile) {
-        // Круговая диаграмма для мобильных
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: results.map(r => r.name),
-                datasets: [{
-                    data: results.map(r => r.score),
-                    backgroundColor: [
-                        '#237DF5', '#4CAF50', '#FFC107', 
-                        '#9C27B0', '#FF5722', '#607D8B',
-                        '#8BC34A', '#E91E63'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.label}: ${context.raw.toFixed(1)}`;
-                            }
-                        }
-                    }
-                },
-                onClick: (e, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        alert(`${results[index].name}: ${results[index].score.toFixed(1)}\n${results[index].description}`);
-                    }
-                }
-            }
-        });
-    } else {
-        // Горизонтальная диаграмма для десктопов
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: results.map(item => item.name),
-                datasets: [{
-                    label: 'Баллы',
-                    data: results.map(item => item.score),
-                    backgroundColor: '#237DF5',
-                    borderColor: '#1a6bd8',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        max: 10
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            afterBody: function(context) {
-                                const index = context[0].dataIndex;
-                                return results[index].description;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
+    // Создаем контейнер для графиков
+    const chartContainer = document.createElement('div');
+    chartContainer.className = 'anchors-chart-container';
     
-    // Создаем легенду
-    const legendContainer = document.createElement('div');
-    legendContainer.className = 'chart-legend';
+    // Десктопная версия (горизонтальные бары)
+    const barCanvas = document.createElement('canvas');
+    barCanvas.className = 'anchors-bar-chart';
+    chartContainer.appendChild(barCanvas);
     
+    // Мобильная версия (компактные вертикальные бары)
+    const compactChart = document.createElement('div');
+    compactChart.className = 'anchors-compact-chart';
     results.forEach((result, i) => {
-        const colors = [
-            '#237DF5', '#4CAF50', '#FFC107', 
-            '#9C27B0', '#FF5722', '#607D8B',
-            '#8BC34A', '#E91E63'
-        ];
+        const item = document.createElement('div');
+        item.className = 'compact-chart-item';
         
-        const legendItem = document.createElement('div');
-        legendItem.className = 'legend-item';
-        legendItem.innerHTML = `
-            <span class="legend-color" style="background-color: ${colors[i]}"></span>
+        const label = document.createElement('div');
+        label.className = 'compact-chart-label';
+        label.innerHTML = `
             <span>${result.name}</span>
+            <span>${result.score.toFixed(1)}/10</span>
         `;
         
-        legendItem.addEventListener('click', () => {
-            alert(`${result.name}: ${result.score.toFixed(1)}\n${result.description}`);
-        });
+        const bar = document.createElement('div');
+        bar.className = 'compact-chart-bar';
         
-        legendContainer.appendChild(legendItem);
+        const progress = document.createElement('div');
+        progress.className = 'compact-chart-progress';
+        progress.style.width = `${result.score * 10}%`;
+        progress.style.background = colors[i];
+        
+        const value = document.createElement('div');
+        value.className = 'compact-chart-value';
+        value.textContent = result.score.toFixed(1);
+        
+        bar.appendChild(progress);
+        bar.appendChild(value);
+        item.appendChild(label);
+        item.appendChild(bar);
+        compactChart.appendChild(item);
     });
+    chartContainer.appendChild(compactChart);
     
-    anchorsChart.appendChild(legendContainer);
+    // Легенда
+    const legend = document.createElement('div');
+    legend.className = 'anchors-legend';
+    results.forEach((result, i) => {
+        const item = document.createElement('div');
+        item.className = 'anchor-legend-item';
+        item.innerHTML = `
+            <span class="anchor-color-box" style="background: ${colors[i]}"></span>
+            <span>${result.name}</span>
+        `;
+        legend.appendChild(item);
+    });
+    chartContainer.appendChild(legend);
+    
+    container.appendChild(chartContainer);
+    
+    // Инициализация десктопного графика
+    new Chart(barCanvas, {
+        type: 'bar',
+        data: {
+            labels: results.map(item => item.name),
+            datasets: [{
+                label: 'Баллы',
+                data: results.map(item => item.score),
+                backgroundColor: colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            return `${context.parsed.x.toFixed(1)}/10`;
+                        },
+                        afterLabel: (context) => {
+                            return results[context.dataIndex].description;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 // Обработчик изменения размера окна
 window.addEventListener('resize', function() {
-    if (window.anchorsChart && window.anchorsResults) {
-        renderChart(window.anchorsResults);
+    if (window.anchorsResults) {
+        renderAnchorsChart(window.anchorsResults);
     }
 });
 
