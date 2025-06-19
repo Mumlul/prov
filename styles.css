@@ -15,7 +15,6 @@ body {
 /* Шапка */
 .header {
     background-color: #ffffff;
-    background: transparent;
     padding: 20px 0;
     position: relative;
     z-index: 100;
@@ -170,22 +169,24 @@ main {
 }
 
 .start-test-btn {
-    background-color: white;
-    color: #237DF5;
-    border: none;
-    padding: 15px 40px;
-    font-size: 18px;
-    font-weight: 600;
-    border-radius: 50px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
 }
-
-.start-test-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.start-test-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+.start-test-btn:hover::after {
+    left: 100%;
+}
+.start-test-btn:active {
+    transform: scale(0.98);
 }
 
 /* Форма */
@@ -1055,4 +1056,142 @@ main {
 .anchor-result p {
     color: #555;
     line-height: 1.6;
+}
+
+.submit-btn, .start-test-btn, .nav-btn, .result-btn {
+    background: linear-gradient(135deg, #237DF5 0%, #2337A5 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: inline-block;
+    margin: 5px;
+}
+
+.submit-btn:hover, .start-test-btn:hover, .nav-btn:hover, .result-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Стили для кнопки "Начать тестирование" в форме */
+#submitFormBtn {
+    width: 100%;
+    margin: 20px 0 10px;
+}
+
+/* Стили для блока с ошибками */
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+    min-height: 20px;
+}
+
+/* Стили для инпутов с ошибками */
+.form-group input.error {
+    border-color: #e74c3c;
+    background-color: #fff9f9;
+}
+
+/* Стили для блока результатов */
+.test-result-block {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 40px;
+    border-left: 5px solid #237DF5;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Убираем двойной бордер */
+.test-result-block::before {
+    display: none;
+}
+
+/* Стили для кнопок в блоке результатов */
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.restart-btn {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+/* Стили для времени прохождения */
+.time-spent {
+    font-size: 14px;
+    color: #666;
+    margin-top: 20px;
+    text-align: right;
+    font-style: italic;
+}
+
+/* Стили для формы ввода данных */
+.user-info-form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-actions {
+    margin-top: 30px;
+}
+
+/* Стили для кнопки "Назад" */
+.back-btn {
+    background: none;
+    border: none;
+    color: #237DF5;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.back-btn:hover {
+    color: #1a6bd8;
+    background-color: rgba(35, 125, 245, 0.1);
+}
+
+@media (max-width: 768px) {
+    .submit-btn, .start-test-btn, .nav-btn, .result-btn {
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+    
+    .result-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .result-btn {
+        width: 100%;
+    }
+    
+    .user-info-form {
+        padding: 25px;
+    }
 }

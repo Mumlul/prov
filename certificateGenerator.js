@@ -2,24 +2,24 @@ import { userName, userGroup } from './navigation.js';
 
 // Описания типов по Холланду
 const HOLLAND_TYPES = {
-    'Реалистичный': {
-        description: 'Предпочитает четкие, структурированные задачи, связанные с техникой, инструментами, машинами. Обладает техническими способностями, развитыми моторными навыками. Часто выбирает профессии, связанные с механикой, строительством, сельским хозяйством.'
-    },
-    'Исследовательский': {
-        description: 'Ориентирован на исследовательскую деятельность, анализ, решение сложных интеллектуальных задач. Обладает аналитическим складом ума, любознательностью. Предпочитает научные профессии, программирование, аналитику.'
-    },
-    'Артистический': {
-        description: 'Творческая личность с развитым воображением и интуицией. Предпочитает неструктурированные задачи, позволяющие выразить себя. Выбирает профессии в искусстве, дизайне, музыке, литературе.'
-    },
-    'Социальный': {
-        description: 'Ориентирован на общение, помощь другим, обучение. Обладает развитыми коммуникативными навыками, эмпатией. Выбирает профессии в образовании, медицине, психологии, социальной работе.'
-    },
-    'Предприимчивый': {
-        description: 'Лидерские качества, ориентация на достижения, энергичность. Предпочитает деятельность, связанную с влиянием на людей, управлением, продажами. Выбирает предпринимательские и управленческие профессии.'
-    },
-    'Конвенциальный': {
-        description: 'Организованность, аккуратность, предпочтение структурированной деятельности. Хорошие исполнительские качества. Выбирает профессии в бухгалтерии, делопроизводстве, административной работе.'
-    }
+        'Реалистический': {
+            fullDescription: 'Реалистический тип: Предпочитает четкие, структурированные задачи, связанные с техникой, инструментами, машинами. Обладает техническими способностями, развитыми моторными навыками. Часто выбирает профессии, связанные с механикой, строительством, сельским хозяйством.'
+        },
+        'Исследовательский': {
+            fullDescription: 'Исследовательский тип: Ориентирован на исследовательскую деятельность, анализ, решение сложных интеллектуальных задач. Обладает аналитическим складом ума, любознательностью. Предпочитает научные профессии, программирование, аналитику.'
+        },
+        'Социальный': {
+            fullDescription: 'Социальный тип: Ориентирован на общение, помощь другим, обучение. Обладает развитыми коммуникативными навыками, эмпатией. Выбирает профессии в образовании, медицине, психологии, социальной работе.'
+        },
+        'Конвенциальный': {
+            fullDescription: 'Конвенциальный тип: Организованность, аккуратность, предпочтение структурированной деятельности. Хорошие исполнительские качества. Выбирает профессии в бухгалтерии, делопроизводстве, административной работе.'
+        },
+        'Предприимчивый': {
+            fullDescription: 'Предприимчивый тип: Лидерские качества, ориентация на достижения, энергичность. Предпочитает деятельность, связанную с влиянием на людей, управлением, продажами. Выбирает предпринимательские и управленческие профессии.'
+        },
+        'Артистический': {
+            fullDescription: 'Артистический тип: Творческая личность с развитым воображением и интуицией. Предпочитает неструктурированные задачи, позволяющие выразить себя. Выбирает профессии в искусстве, дизайне, музыке, литературе.'
+        }
 };
 
 export async function generateCertificate(hollandData, anchorsData) {
@@ -87,11 +87,31 @@ export async function generateCertificate(hollandData, anchorsData) {
 }
 
 function createHollandPageHtml(data) {
-    const typeBlocks = data.hollandTypes.map((item, idx) => `
-        <div class="type-section">
-            <div class="type-name">${item.type}</div>
-            <div class="type-description">${item.description}</div>
-        </div>
+    // Обработка данных теста Холланда
+    let personalityType = 'Не определено';
+    let descriptions = [];
+    let professions = [];
+    
+    if (data.hollandTypes && data.hollandTypes.length > 0) {
+        personalityType = data.hollandTypes.map(t => t.type).join(' + ');
+        descriptions = data.hollandTypes.map(t => t.description);
+    } else if (data.personality) {
+        personalityType = data.personality;
+        // Для совместимости со старыми данными
+        const types = data.personality.split('+').map(t => t.trim());
+        descriptions = types.map(type => {
+            return HOLLAND_TYPES[type] ? HOLLAND_TYPES[type].description : `Описание для "${type}" не найдено`;
+        });
+    }
+    
+    if (data.hollandProfessions && data.hollandProfessions.length > 0) {
+        professions = data.hollandProfessions;
+    } else if (data.professions) {
+        professions = data.professions;
+    }
+
+    const descriptionBlocks = descriptions.map(desc => `
+        <div class="pdf-type-desc">${desc}</div>
     `).join('');
 
     return `
@@ -105,7 +125,7 @@ function createHollandPageHtml(data) {
                 body {
                     font-family: 'Arial', sans-serif;
                     margin: 0;
-                    padding: 15mm 20mm; /* Увеличим отступы */
+                    padding: 15mm 20mm;
                     line-height: 1.6;
                     font-size: 11pt;
                     background-color: #ffffff;
@@ -114,38 +134,48 @@ function createHollandPageHtml(data) {
                     height: 297mm;
                     box-sizing: border-box;
                 }
-                .header {
+                .background-image {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100%;
+                    height: auto;
+                    max-width: 100%;
+                    max-height: 100%;
+                    opacity: 0.1;
+                    z-index: -1;
+                }
+                .pdf-header {
                     margin-bottom: 8mm;
                     text-align: center;
                 }
-                .main-title {
+                .pdf-main-title {
                     font-size: 16pt;
                     font-weight: bold;
                     color: #2337A5;
                     margin-bottom: 3mm;
                     text-transform: uppercase;
                 }
-                .subtitle {
+                .pdf-subtitle {
                     font-size: 12pt;
                     color: #666666;
                 }
-                .user-info {
+                .pdf-user-info {
                     margin-bottom: 10mm;
                     padding: 6mm;
-                    background-color: #f8f9fa;
-                    border-radius: 4px;
                 }
-                .info-row {
+                .pdf-info-row {
                     margin-bottom: 3mm;
                 }
-                .info-label {
+                .pdf-info-label {
                     font-weight: bold;
                     color: #2337A5;
                 }
-                .section {
+                .pdf-section {
                     margin-bottom: 10mm;
                 }
-                .section-title {
+                .pdf-section-title {
                     font-size: 14pt;
                     font-weight: bold;
                     color: #2337A5;
@@ -153,37 +183,35 @@ function createHollandPageHtml(data) {
                     border-bottom: 2px solid #eeeeee;
                     padding-bottom: 2mm;
                 }
-                .type-name {
-                    font-size: 13pt;
+                .pdf-personality-type {
+                    font-size: 14pt;
                     font-weight: bold;
-                    color: #2337A5;
+                    color: #237DF5;
                     margin-bottom: 5mm;
                 }
-                .type-description {
-                    margin-left: 10mm;
-                    margin-right: 10mm;
+                .pdf-type-desc {
+                    margin-bottom: 5mm;
                     text-align: justify;
-                    margin-bottom: 5mm;
                 }
-                .professions-list {
+                .pdf-professions-list {
                     columns: 2;
                     column-gap: 15mm;
                     margin-top: 5mm;
                 }
-                .professions-list li {
+                .pdf-professions-list li {
                     margin-bottom: 3mm;
                     break-inside: avoid;
                     padding-left: 5mm;
                     position: relative;
                 }
-                .professions-list li:before {
+                .pdf-professions-list li:before {
                     content: "•";
                     position: absolute;
                     left: 0;
                     color: #2337A5;
                     font-weight: bold;
                 }
-                .footer {
+                .pdf-footer {
                     text-align: center;
                     margin-top: 15mm;
                     font-size: 9pt;
@@ -192,28 +220,29 @@ function createHollandPageHtml(data) {
             </style>
         </head>
         <body>
-            <div class="header">
-                <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
-                <div class="subtitle">Тест Холланда на определение типа личности</div>
+            <div class="pdf-header">
+                <div class="pdf-main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
+                <div class="pdf-subtitle">Тест Холланда на определение типа личности</div>
             </div>
-            <div class="user-info">
-                <div class="info-row"><span class="info-label">ФИО:</span> ${data.name}</div>
-                <div class="info-row"><span class="info-label">Группа/класс:</span> ${data.group}</div>
-                <div class="info-row"><span class="info-label">Дата тестирования:</span> ${data.date}</div>
+            <div class="pdf-user-info">
+                <div class="pdf-info-row"><span class="pdf-info-label">ФИО:</span> ${data.name}</div>
+                <div class="pdf-info-row"><span class="pdf-info-label">Группа/класс:</span> ${data.group}</div>
+                <div class="pdf-info-row"><span class="pdf-info-label">Дата тестирования:</span> ${data.date}</div>
             </div>
-            <div class="section">
-                <div class="section-title">Ваш тип личности</div>
-                ${typeBlocks}
+            <div class="pdf-section">
+                <div class="pdf-section-title">Ваш тип личности</div>
+                <div class="pdf-personality-type">${personalityType}</div>
+                ${descriptionBlocks}
             </div>
-            ${Array.isArray(data.hollandProfessions) && data.hollandProfessions.length > 0 ? `
-            <div class="section">
-                <div class="section-title">Рекомендуемые профессии</div>
-                <ul class="professions-list">
-                    ${data.hollandProfessions.map(p => `<li>${p}</li>`).join('')}
+            ${professions.length > 0 ? `
+            <div class="pdf-section">
+                <div class="pdf-section-title">Рекомендуемые профессии</div>
+                <ul class="pdf-professions-list">
+                    ${professions.map(p => `<li>${p}</li>`).join('')}
                 </ul>
             </div>
             ` : ''}
-            <div class="footer">
+            <div class="pdf-footer">
                 Страница 1 из 2 · Документ сгенерирован автоматически
             </div>
         </body>
@@ -221,168 +250,6 @@ function createHollandPageHtml(data) {
     `;
 }
 
-// function createAnchorsPageHtml(data) {
-//     // Берём только 2 лучших результата
-//     const topAnchors = [...data.anchorsResults]
-//         .sort((a, b) => b.score - a.score)
-//         .slice(0, 2);
-
-//     // Создаем данные для легенды
-//     const legendItems = data.anchorsResults
-//         .sort((a, b) => b.score - a.score)
-//         .map((item, index) => ({
-//             name: item.name,
-//             score: item.score.toFixed(1),
-//             color: ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#843b62', '#F28482'][index % 6]
-//         }));
-
-//     return `
-//         <!DOCTYPE html>
-//         <html lang="ru">
-//         <head>
-//             <meta charset="UTF-8">
-//             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//             <title>Результаты теста "Якоря карьеры"</title>
-//             <style>
-//                 body {
-//                     font-family: 'Arial', sans-serif;
-//                     margin: 0;
-//                     padding: 15mm 20mm;
-//                     line-height: 1.6;
-//                     font-size: 11pt;
-//                     background-color: #ffffff;
-//                     color: #333333;
-//                     width: 210mm;
-//                     height: 297mm;
-//                     box-sizing: border-box;
-//                 }
-//                 .header {
-//                     margin-bottom: 8mm;
-//                     text-align: center;
-//                 }
-//                 .main-title {
-//                     font-size: 16pt;
-//                     font-weight: bold;
-//                     color: #2337A5;
-//                     margin-bottom: 3mm;
-//                     text-transform: uppercase;
-//                 }
-//                 .subtitle {
-//                     font-size: 12pt;
-//                     color: #666666;
-//                 }
-//                 .section {
-//                     margin-bottom: 10mm;
-//                 }
-//                 .section-title {
-//                     font-size: 14pt;
-//                     font-weight: bold;
-//                     color: #2337A5;
-//                     margin-bottom: 5mm;
-//                     border-bottom: 2px solid #eeeeee;
-//                     padding-bottom: 2mm;
-//                 }
-//                 .anchor-item {
-//                     margin-bottom: 8mm;
-//                     padding: 0 10mm;
-//                 }
-//                 .anchor-header {
-//                     display: flex;
-//                     justify-content: space-between;
-//                     align-items: center;
-//                     margin-bottom: 3mm;
-//                 }
-//                 .anchor-name {
-//                     font-size: 13pt;
-//                     font-weight: bold;
-//                     color: #2337A5;
-//                 }
-//                 .anchor-score {
-//                     font-size: 13pt;
-//                     font-weight: bold;
-//                     color: #ffffff;
-//                     background-color: #2337A5;
-//                     padding: 2mm 4mm;
-//                     border-radius: 4px;
-//                 }
-//                 .chart-container {
-//                     margin-top: 15mm;
-//                     text-align: center;
-//                     position: relative;
-//                 }
-//                 .chart-title {
-//                     font-size: 13pt;
-//                     font-weight: bold;
-//                     color: #2337A5;
-//                     margin-bottom: 5mm;
-//                 }
-//                 .chart-image {
-//                     width: 100%;
-//                     max-width: 300px;
-//                     margin: 0 auto;
-//                     display: block;
-//                 }
-//                 .legend {
-//                     margin-top: 10px;
-//                     text-align: center;
-//                 }
-//                 .legend-item {
-//                     display: inline-block;
-//                     margin: 5px 10px;
-//                     font-size: 10pt;
-//                 }
-//                 .legend-color {
-//                     display: inline-block;
-//                     width: 12px;
-//                     height: 12px;
-//                     border-radius: 50%;
-//                     margin-right: 5px;
-//                 }
-//                 .footer {
-//                     text-align: center;
-//                     margin-top: 15mm;
-//                     font-size: 9pt;
-//                     color: #999999;
-//                 }
-//             </style>
-//         </head>
-//         <body>
-//             <div class="header">
-//                 <div class="main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
-//                 <div class="subtitle">Тест "Якоря карьеры" Шейна</div>
-//             </div>
-//             ${topAnchors.length > 0 ? `
-//             <div class="section">
-//                 <div class="section-title">Ваши карьерные ориентации</div>
-//                 ${topAnchors.map(item => `
-//                     <div class="anchor-item">
-//                         <div class="anchor-header">
-//                             <div class="anchor-name">${item.name}</div>
-//                             <div class="anchor-score">${item.score.toFixed(1)}</div>
-//                         </div>
-//                         <div class="anchor-description">${item.description || 'Описание отсутствует'}</div>
-//                     </div>
-//                 `).join('')}
-//             </div>
-//             ` : ''}
-//             <div class="chart-container">
-//                 <div class="chart-title">Распределение якорей карьеры</div>
-//                 <div class="legend">
-//                     ${legendItems.map(item => `
-//                         <div class="legend-item">
-//                             <span class="legend-color" style="background-color: ${item.color};"></span>
-//                             ${item.name}: ${item.score}
-//                         </div>
-//                     `).join('')}
-//                 </div>
-//             </div>
-//             <div class="footer">
-//                 Страница 2 из 2 · Документ сгенерирован автоматически
-//             </div>
-//         </body>
-//         </html>
-//     `;
-// }
 function createAnchorsPageHtml(data) {
     const topAnchors = [...data.anchorsResults]
         .sort((a, b) => b.score - a.score)
@@ -393,38 +260,129 @@ function createAnchorsPageHtml(data) {
         <html lang="ru">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Результаты теста "Якоря карьеры"</title>
             <style>
-                .chart-visualization {
-                    margin: 20px 0;
+                body {
+                    font-family: 'Arial', sans-serif;
+                    margin: 0;
+                    padding: 15mm 20mm;
+                    line-height: 1.6;
+                    font-size: 11pt;
+                    background-color: #ffffff;
+                    color: #333333;
+                    width: 210mm;
+                    height: 297mm;
+                    box-sizing: border-box;
                 }
-                .chart-bar {
-                    display: flex;
-                    align-items: center;
-                    margin: 8px 0;
+                .pdf-header {
+                    margin-bottom: 8mm;
+                    text-align: center;
                 }
-                .chart-bar-color {
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 4px;
-                    margin-right: 10px;
-                }
-                .chart-bar-label {
-                    min-width: 200px;
-                }
-                .chart-bar-value {
+                .pdf-main-title {
+                    font-size: 16pt;
                     font-weight: bold;
+                    color: #2337A5;
+                    margin-bottom: 3mm;
+                    text-transform: uppercase;
+                }
+                .pdf-subtitle {
+                    font-size: 12pt;
+                    color: #666666;
+                }
+                .pdf-user-info {
+                    margin-bottom: 10mm;
+                    padding: 6mm;
+                }
+                .pdf-info-row {
+                    margin-bottom: 3mm;
+                }
+                .pdf-info-label {
+                    font-weight: bold;
+                    color: #2337A5;
+                }
+                .pdf-section {
+                    margin-bottom: 10mm;
+                }
+                .pdf-section-title {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    color: #2337A5;
+                    margin-bottom: 5mm;
+                    border-bottom: 2px solid #eeeeee;
+                    padding-bottom: 2mm;
+                }
+                .pdf-personality-type {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    color: #237DF5;
+                    margin-bottom: 5mm;
+                }
+                .pdf-type-desc {
+                    margin-bottom: 5mm;
+                    text-align: justify;
+                    padding: 5mm;
+                }
+                .pdf-professions-list {
+                    columns: 2;
+                    column-gap: 15mm;
+                    margin-top: 5mm;
+                }
+                .pdf-professions-list li {
+                    margin-bottom: 3mm;
+                    break-inside: avoid;
+                    padding-left: 5mm;
+                    position: relative;
+                }
+                .pdf-professions-list li:before {
+                    position: absolute;
+                    left: 0;
+                    color: #2337A5;
+                    font-weight: bold;
+                }
+                .pdf-footer {
+                    text-align: center;
+                    margin-top: 15mm;
+                    font-size: 9pt;
+                    color: #999999;
+                }
+                .pdf-anchor-item {
+                    margin-bottom: 8mm;
+                    padding: 5mm;
+                }
+                .pdf-anchor-name {
+                    font-size: 13pt;
+                    font-weight: bold;
+                    color: #2337A5;
+                    margin-bottom: 3mm;
+                }
+                .pdf-anchor-score {
+                    font-size: 13pt;
+                    font-weight: bold;
+                    color: #237DF5;
+                    margin-bottom: 3mm;
                 }
             </style>
         </head>
         <body>
-            <div class="chart-visualization">
-                ${data.chartData.labels.map((label, index) => `
-                    <div class="chart-bar">
-                        <div class="chart-bar-color" style="background-color: ${data.chartData.colors[index % data.chartData.colors.length]};"></div>
-                        <div class="chart-bar-label">${label}</div>
-                        <div class="chart-bar-value">${data.chartData.scores[index].toFixed(1)}</div>
+            <div class="pdf-header">
+                <div class="pdf-main-title">РЕЗУЛЬТАТЫ ПРОФОРИЕНТАЦИИ</div>
+                <div class="pdf-subtitle">Тест "Якоря карьеры" Шейна</div>
+            </div>
+            ${topAnchors.length > 0 ? `
+            <div class="pdf-section">
+                <div class="pdf-section-title">Ваши карьерные ориентации</div>
+                ${topAnchors.map(item => `
+                    <div class="pdf-anchor-item">
+                        <div class="pdf-anchor-name">${item.name}</div>
+                        <div class="pdf-anchor-score">Оценка: ${item.score.toFixed(1)}</div>
+                        <div class="pdf-type-desc">${item.description || 'Описание отсутствует'}</div>
                     </div>
                 `).join('')}
+            </div>
+            ` : ''}
+            <div class="pdf-footer">
+                Страница 2 из 2 · Документ сгенерирован автоматически
             </div>
         </body>
         </html>
@@ -438,7 +396,7 @@ async function addPageToPdf(pdf, html, isFirstPage) {
         tempDiv.style.left = '-9999px';
         tempDiv.style.width = '210mm';
         tempDiv.style.height = '297mm';
-        tempDiv.style.padding = '0 20mm';
+        tempDiv.style.padding = '30mm 20mm';
         tempDiv.style.boxSizing = 'border-box';
         tempDiv.innerHTML = html;
         document.body.appendChild(tempDiv);

@@ -133,7 +133,6 @@ export async function showResults() {
             resultPersonality.textContent = personality;
             hollandTimeSpent.textContent = time;
             
-            // Если есть данные для описания
             if (hollandData) {
                 const description = hollandData.description || 'Описание недоступно';
                 hollandDescription.innerHTML = description;
@@ -147,78 +146,63 @@ export async function showResults() {
         }
         
         // 3. Отображаем результаты теста "Якоря карьеры"
-        if (window.anchorsResults && anchorsResult && anchorsDescription && anchorsTimeSpent) {
-            const topAnchors = window.anchorsResults.slice(0, 2);
+        if (anchorsResult && anchorsDescription && anchorsTimeSpent) {
+            // Получаем результаты из anchorsData или window.anchorsResults
+            const results = anchorsData?.results || window.anchorsResults || [];
+            const timeSpent = window.anchorsTimeSpent || 'N/A';
             
-            // Обновляем текстовые результаты
-            anchorsResult.textContent = topAnchors.map(a => a.name).join(', ');
+            // Обновляем время прохождения
+            anchorsTimeSpent.textContent = timeSpent;
             
-            // Добавляем описания
-            anchorsDescription.innerHTML = topAnchors.map(anchor => `
-                <div class="anchor-result">
-                    <h4>${anchor.name} (${anchor.score.toFixed(1)})</h4>
-                    <p>${anchor.description}</p>
-                </div>
-            `).join('');
-            
-            if (window.anchorsTimeSpent) {
-                anchorsTimeSpent.textContent = window.anchorsTimeSpent;
-            }
-            
-            if (anchorsChart) {
-                renderAnchorsChart(window.anchorsResults);
+            if (results.length > 0) {
+                // Отображаем топ-2 ориентации
+                const topAnchors = results.slice(0, 2);
+                anchorsResult.textContent = topAnchors.map(a => `${a.name} (${a.score.toFixed(1)})`).join(', ');
+                
+                // Добавляем подробные описания
+                anchorsDescription.innerHTML = topAnchors.map(anchor => `
+                    <div class="anchor-result">
+                        <h4>${anchor.name}</h4>
+                        <p><strong>Оценка:</strong> ${anchor.score.toFixed(1)}</p>
+                        <p>${anchor.description}</p>
+                    </div>
+                `).join('');
+            } else {
+                anchorsResult.textContent = 'Нет данных';
+                anchorsDescription.innerHTML = '<p>Результаты теста "Якоря карьеры" не найдены</p>';
             }
         }
         
-        // 4. Настраиваем кнопку PDF (ваш существующий код с улучшениями)
-        if (hollandData && anchorsData) {
-            const oldBtn = document.querySelector('#resultContainer .pdf-btn');
-            if (oldBtn) oldBtn.remove();
-            
-            const pdfBtn = document.createElement('button');
-            pdfBtn.textContent = 'Скачать сертификат (PDF)';
-            pdfBtn.className = 'pdf-btn submit-btn';
-            pdfBtn.style.margin = '10px auto';
-            pdfBtn.style.display = 'block';
-            
-            pdfBtn.onclick = async () => {
+        // 4. Настраиваем кнопку PDF
+        const downloadBtn = document.getElementById('download-certificate-btn');
+        if (downloadBtn) {
+            downloadBtn.onclick = async () => {
                 try {
-                    pdfBtn.disabled = true;
-                    pdfBtn.textContent = 'Генерация PDF...';
+                    // Получаем полные данные для PDF
+                    const hollandData = {
+                        ...(window.prepareHollandCertificateData?.() || { 
+                            personality: 'Не определено',
+                            description: 'Тест Голланда не пройден',
+                            professions: []
+                        }),
+                        name: userName,
+                        group: userGroup,
+                        date: new Date().toLocaleDateString('ru-RU')
+                    };
                     
-                    // Добавляем обработку ошибок для генерации
-                    await generateCertificate(
-                        hollandData || { 
-                            types: 'Не определено', 
-                            description: 'Тест Голланда не пройден', 
-                            professions: [] 
-                        },
-                        anchorsData || { results: [] }
-                    );
+                    const anchorsData = window.prepareAnchorsCertificateData?.() || { results: [] };
+                    
+                    await generateCertificate(hollandData, anchorsData);
                 } catch (error) {
                     console.error('Ошибка генерации PDF:', error);
                     alert('Не удалось сгенерировать PDF. Пожалуйста, попробуйте позже.');
-                } finally {
-                    pdfBtn.disabled = false;
-                    pdfBtn.textContent = 'Скачать сертификат (PDF)';
                 }
             };
-            
-            const resultFooter = document.querySelector('#resultContainer .result-content');
-            if (resultFooter) {
-                const restartBtn = document.getElementById('restart-btn');
-                if (restartBtn) {
-                    resultFooter.insertBefore(pdfBtn, restartBtn);
-                } else {
-                    resultFooter.appendChild(pdfBtn);
-                }
-            }
         }
         
     } catch (error) {
         console.error('Ошибка при отображении результатов:', error);
         
-        // Показываем сообщение об ошибке пользователю
         if (resultContainer) {
             const errorElement = document.createElement('div');
             errorElement.className = 'error-message';
@@ -234,149 +218,3 @@ export async function showResults() {
 }
 
 // Добавим функцию renderAnchorsChart, если она не определена
-if (!window.renderAnchorsChart) {
-    window.renderAnchorsChart = function(results) {
-        if (!anchorsChart) return;
-
-        anchorsChart.innerHTML = '';
-        try {
-            const container = document.getElementById('anchors-chart');
-            if (!container) {
-                console.error('Контейнер для диаграммы не найден');
-                return;
-            }
-
-            if (!results || results.length === 0) {
-                console.error('Нет данных для диаграммы');
-                container.innerHTML = '<p>Нет данных для отображения</p>';
-                return;
-            }
-
-            // Цвета для якорей
-            const colors = [
-                '#237DF5', '#4CAF50', '#FFC107',
-                '#9C27B0', '#FF5722', '#607D8B',
-                '#8BC34A', '#E91E63'
-            ];
-
-            // Основной контейнер с flex-расположением
-            const mainContainer = document.createElement('div');
-            mainContainer.style.display = 'flex';
-            mainContainer.style.flexWrap = 'wrap';
-            mainContainer.style.justifyContent = 'center';
-            mainContainer.style.alignItems = 'center';
-            mainContainer.style.gap = '20px';
-            mainContainer.style.width = '100%';
-            mainContainer.style.maxWidth = '600px';
-            mainContainer.style.margin = '0 auto';
-
-            // Контейнер для диаграммы
-            const chartContainer = document.createElement('div');
-            chartContainer.style.flex = '1';
-            chartContainer.style.minWidth = '250px';
-
-            // Canvas для диаграммы
-            const canvas = document.createElement('canvas');
-            canvas.style.display = 'block';
-            canvas.width = 250;
-            canvas.height = 250;
-            canvas.style.width = '250px';
-            canvas.style.height = '250px';
-            chartContainer.appendChild(canvas);
-
-            // Контейнер для легенды (сбоку)
-            const legendContainer = document.createElement('div');
-            legendContainer.style.flex = '1';
-            legendContainer.style.minWidth = '200px';
-            legendContainer.style.padding = '10px';
-
-            // Заголовок легенды
-            const legendTitle = document.createElement('div');
-            legendTitle.textContent = 'Карьерные ориентации';
-            legendTitle.style.fontWeight = 'bold';
-            legendTitle.style.marginBottom = '10px';
-            legendTitle.style.color = '#2337A5';
-            legendContainer.appendChild(legendTitle);
-
-            // Элементы легенды
-            results.forEach((result, i) => {
-                const legendItem = document.createElement('div');
-                legendItem.style.display = 'flex';
-                legendItem.style.alignItems = 'center';
-                legendItem.style.margin = '8px 0';
-
-                const colorBox = document.createElement('div');
-                colorBox.style.width = '15px';
-                colorBox.style.height = '15px';
-                colorBox.style.backgroundColor = colors[i % colors.length];
-                colorBox.style.borderRadius = '3px';
-                colorBox.style.marginRight = '10px';
-                colorBox.style.flexShrink = '0';
-
-                const label = document.createElement('div');
-                label.style.flex = '1';
-                label.innerHTML = `
-                    <div style="font-weight: 600;">${result.name}</div>
-                    <div style="font-size: 0.9em; color: #555;">Оценка: ${result.score.toFixed(1)}</div>
-                `;
-
-                legendItem.appendChild(colorBox);
-                legendItem.appendChild(label);
-                legendContainer.appendChild(legendItem);
-            });
-
-            // Собираем все вместе
-            mainContainer.appendChild(chartContainer);
-            mainContainer.appendChild(legendContainer);
-            container.appendChild(mainContainer);
-
-            // Проверка наличия Chart.js
-            if (typeof Chart === 'undefined') {
-                console.error('Chart.js не загружен');
-                container.innerHTML = '<p>Ошибка загрузки библиотеки графиков</p>';
-                return;
-            }
-
-            // Создаем диаграмму
-            new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: results.map(item => item.name),
-                    datasets: [{
-                        data: results.map(item => item.score),
-                        backgroundColor: colors,
-                        borderWidth: 1,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => 
-                                    `${context.label}: ${context.raw.toFixed(1)}`
-                            }
-                        }
-                    },
-                    cutout: '65%',
-                    rotation: -90,
-                    circumference: 360,
-                    animation: {
-                        animateScale: false,
-                        animateRotate: true
-                    }
-                }
-            });
-
-        } catch (error) {
-            console.error('Ошибка при создании диаграммы:', error);
-            const container = document.getElementById('anchors-chart');
-            if (container) {
-                container.innerHTML = '<p>Ошибка при отображении диаграммы</p>';
-            }
-        }
-    };
-}

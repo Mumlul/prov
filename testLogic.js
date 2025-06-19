@@ -309,17 +309,18 @@ function prepareHollandCertificateData() {
         }))
         .sort((a, b) => b.score - a.score);
 
-    // Получаем описания для типов
-    const hollandTypes = sortedScores.map(item => ({
-        type: item.type,
-        description: getPersonalityDescription(item.key).fullDescription
-    }));
+    const dominantType = sortedScores[0];
+    const secondaryType = sortedScores[1] || null;
 
     return {
-        types: `${sortedScores[0].type}${sortedScores[1] ? ` + ${sortedScores[1].type}` : ''}`,
+        personality: `${dominantType.type}${secondaryType ? ` + ${secondaryType.type}` : ''}`,
         description: personalityInfo.fullDescription,
         professions: personalityInfo.recommendedProfessions,
-        hollandTypes: hollandTypes // Добавляем массив типов с описаниями
+        types: sortedScores.map(item => ({
+            type: item.type,
+            score: item.score,
+            description: getPersonalityDescription(item.key).fullDescription
+        }))
     };
 }
 

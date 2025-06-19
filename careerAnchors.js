@@ -122,7 +122,6 @@ function prevCareerQuestion() {
 async function finishCareerTest() {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
     const results = calculateAnchorsResults();
-
     window.anchorsResults = results;
     window.anchorsTimeSpent = timeSpent;
     
@@ -220,18 +219,13 @@ function calculateAnchorsResults() {
     }
     
     // Преобразуем в массив и сортируем
-    const results = Object.entries(scores)
+    return Object.entries(scores)
         .map(([key, score]) => ({
             name: getAnchorName(key),
             description: getAnchorDescription(key),
             score
         }))
         .sort((a, b) => b.score - a.score);
-
-    // Сохраняем топ-2 результата для отображения
-    window.topAnchors = results.slice(0, 2);
-    
-    return results;
 }
 
 function renderAnchorsChart(results) {
@@ -257,11 +251,20 @@ function renderAnchorsChart(results) {
             '#8BC34A', '#E91E63'
         ];
 
-        // Основной контейнер
+        // Основной контейнер с flex-расположением
+        const mainContainer = document.createElement('div');
+        mainContainer.style.display = 'flex';
+        mainContainer.style.flexWrap = 'wrap';
+        mainContainer.style.justifyContent = 'center';
+        mainContainer.style.alignItems = 'center';
+        mainContainer.style.gap = '30px';
+        mainContainer.style.width = '100%';
+        mainContainer.style.maxWidth = '600px';
+        mainContainer.style.margin = '0 auto';
+
+        // Контейнер для диаграммы
         const chartContainer = document.createElement('div');
-        chartContainer.style.width = '100%';
-        chartContainer.style.maxWidth = '300px';
-        chartContainer.style.margin = '0 auto';
+        chartContainer.style.flex = '0 0 auto';
 
         // Canvas для диаграммы
         const canvas = document.createElement('canvas');
@@ -272,35 +275,63 @@ function renderAnchorsChart(results) {
         canvas.style.height = '250px';
         chartContainer.appendChild(canvas);
 
-        // Компактная легенда
-        const compactLegend = document.createElement('div');
-        compactLegend.style.marginTop = '10px';
-        compactLegend.style.fontSize = '12px';
+        // Контейнер для легенды (сбоку)
+        const legendContainer = document.createElement('div');
+        legendContainer.style.flex = '1';
+        legendContainer.style.minWidth = '250px';
+        legendContainer.style.padding = '10px';
         
-        results.slice(0, 3).forEach((result, i) => {
-            const item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.alignItems = 'center';
-            item.style.margin = '3px 0';
+        // Заголовок легенды
+        const legendTitle = document.createElement('h4');
+        legendTitle.textContent = 'Карьерные ориентации';
+        legendTitle.style.fontWeight = '600';
+        legendTitle.style.marginBottom = '15px';
+        legendTitle.style.color = '#2337A5';
+        legendContainer.appendChild(legendTitle);
+
+        // Элементы легенды
+        results.forEach((result, i) => {
+            const legendItem = document.createElement('div');
+            legendItem.style.display = 'flex';
+            legendItem.style.alignItems = 'center';
+            legendItem.style.marginBottom = '12px';
+            legendItem.style.padding = '8px';
+            legendItem.style.borderRadius = '6px';
+            legendItem.style.backgroundColor = '#f8f9fa';
             
-            const colorBox = document.createElement('span');
-            colorBox.style.display = 'inline-block';
-            colorBox.style.width = '12px';
-            colorBox.style.height = '12px';
-            colorBox.style.backgroundColor = colors[i];
-            colorBox.style.marginRight = '5px';
-            colorBox.style.borderRadius = '2px';
+            const colorBox = document.createElement('div');
+            colorBox.style.width = '16px';
+            colorBox.style.height = '16px';
+            colorBox.style.backgroundColor = colors[i % colors.length];
+            colorBox.style.borderRadius = '4px';
+            colorBox.style.marginRight = '12px';
+            colorBox.style.flexShrink = '0';
             
-            const label = document.createElement('span');
-            label.textContent = `${result.name.split(' ')[0]} ${result.score.toFixed(1)}`;
+            const labelContainer = document.createElement('div');
+            labelContainer.style.flex = '1';
             
-            item.appendChild(colorBox);
-            item.appendChild(label);
-            compactLegend.appendChild(item);
+            const nameLabel = document.createElement('div');
+            nameLabel.textContent = result.name;
+            nameLabel.style.fontWeight = '600';
+            nameLabel.style.marginBottom = '4px';
+            
+            const scoreLabel = document.createElement('div');
+            scoreLabel.textContent = `Оценка: ${result.score.toFixed(1)}`;
+            scoreLabel.style.fontSize = '0.9em';
+            scoreLabel.style.color = '#666';
+            
+            labelContainer.appendChild(nameLabel);
+            labelContainer.appendChild(scoreLabel);
+            
+            legendItem.appendChild(colorBox);
+            legendItem.appendChild(labelContainer);
+            legendContainer.appendChild(legendItem);
         });
 
-        chartContainer.appendChild(compactLegend);
-        container.appendChild(chartContainer);
+        // Собираем все вместе
+        mainContainer.appendChild(chartContainer);
+        mainContainer.appendChild(legendContainer);
+        container.appendChild(mainContainer);
 
         // Проверка наличия Chart.js
         if (typeof Chart === 'undefined') {
@@ -342,6 +373,22 @@ function renderAnchorsChart(results) {
                 }
             }
         });
+
+        // Адаптация для мобильных устройств
+        const mediaQuery = window.matchMedia('(max-width: 600px)');
+        function handleMobileChange(e) {
+            if (e.matches) {
+                mainContainer.style.flexDirection = 'column';
+                mainContainer.style.gap = '15px';
+                legendContainer.style.minWidth = '100%';
+            } else {
+                mainContainer.style.flexDirection = 'row';
+                mainContainer.style.gap = '30px';
+                legendContainer.style.minWidth = '250px';
+            }
+        }
+        mediaQuery.addListener(handleMobileChange);
+        handleMobileChange(mediaQuery);
 
     } catch (error) {
         console.error('Ошибка при создании диаграммы:', error);
@@ -389,8 +436,14 @@ function getAnchorDescription(key) {
 
 function prepareAnchorsCertificateData() {
     const results = calculateAnchorsResults();
-    console.log('Данные для сертификата (Якоря):', results);
-    return { results };
+    return { 
+        results,
+        chartData: {
+            labels: results.map(r => r.name),
+            scores: results.map(r => r.score),
+            colors: ['#237DF5', '#4CAF50', '#FFC107', '#9C27B0', '#FF5722', '#607D8B', '#8BC34A', '#E91E63']
+        }
+    };
 }
 
 export { 
